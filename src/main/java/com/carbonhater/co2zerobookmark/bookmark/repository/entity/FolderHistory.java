@@ -1,9 +1,10 @@
 package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
 
+import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
 
 @Entity
-public class FolderHistory {
+public class FolderHistory extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long folderHistoryId;

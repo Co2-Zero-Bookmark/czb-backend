@@ -1,8 +1,9 @@
 package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
 
+import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
 @Entity
-public class Folder {
+public class Folder extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,6 +9,7 @@ public class BoardHistory extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long boardHistoryId;
+    private Long userId;
     private String boardTitle;
     private String boardContent;
 

@@ -1,19 +1,13 @@
 package com.carbonhater.co2zerobookmark.common.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.io.Serializable;
 
 @Entity
-public class CommonCode extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long groupCodeId;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long codeId;
+public class CommonCode extends BaseEntity implements Serializable {
+    @EmbeddedId
+    private CommonCodeId commonCodeId;
 
     private String codeName;
     private String codeDescription;
