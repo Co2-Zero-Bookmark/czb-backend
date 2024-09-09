@@ -45,8 +45,12 @@ dependencies {
 
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // JUnit Vintage Engine for backward compatibility
+    testImplementation("org.junit.vintage:junit-vintage-engine") {
+        exclude group: "org.hamcrest", module: "hamcrest-core"
+    }
     // Swagger/OpenAPI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'     // Swagger/OpenAPI support
 
