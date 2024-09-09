@@ -1,4 +1,4 @@
-Configutation:
+Configuration:
   name: Default
   status: warn
 
@@ -29,6 +29,7 @@ Configutation:
             size: 1 KB
         DefaultRollOverStrategy:
           max: 30
+
   Loggers:
     Root:
       level: info
@@ -36,10 +37,30 @@ Configutation:
         - ref: Console_Appender
         - ref: File_Appender
         - ref: RollingFile_Appender
+
     Logger:
+      # edu.project 및 Hibernate SQL 로그 설정을 하나의 Logger로 통합
       - name: edu.project
         additivity: false
         level: debug
+        AppenderRef:
+          - ref: Console_Appender
+          - ref: File_Appender
+          - ref: RollingFile_Appender
+
+      # Hibernate SQL 로그 설정
+      - name: org.hibernate.SQL
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: Console_Appender
+          - ref: File_Appender
+          - ref: RollingFile_Appender
+
+      # Hibernate 파라미터 로그 설정
+      - name: org.hibernate.type.descriptor.sql.BasicBinder
+        level: trace
+        additivity: false
         AppenderRef:
           - ref: Console_Appender
           - ref: File_Appender
