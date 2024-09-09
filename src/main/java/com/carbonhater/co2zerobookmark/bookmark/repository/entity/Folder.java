@@ -1,10 +1,6 @@
 package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
 
-import com.carbonhater.co2zerobookmark.board.repository.entity.BoardFolderRelation;
 import jakarta.persistence.*;
-
-import java.util.List;
-
 @Entity
 public class Folder {
 

@@ -1,7 +1,5 @@
 package com.carbonhater.co2zerobookmark.common.entity;
 
-import com.carbonhater.co2zerobookmark.board.repository.entity.Board;
-import com.carbonhater.co2zerobookmark.user.repository.entity.User;
 import jakarta.persistence.*;
 
 @Entity
