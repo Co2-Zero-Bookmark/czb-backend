@@ -33,6 +33,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+    //Spring Security
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     // Lombok
     annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'org.projectlombok:lombok'
@@ -45,6 +48,7 @@ dependencies {
 
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     // testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // JUnit Vintage Engine for backward compatibility
