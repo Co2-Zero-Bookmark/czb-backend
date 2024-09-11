@@ -2,7 +2,9 @@ package com.carbonhater.co2zerobookmark.board.repository.entity;
 
 import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 public class Board extends BaseEntity {
       @Id
