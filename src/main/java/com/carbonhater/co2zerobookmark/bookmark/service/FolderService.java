@@ -4,6 +4,7 @@ import com.carbonhater.co2zerobookmark.bookmark.model.dto.FolderUpdateDto;
 import com.carbonhater.co2zerobookmark.bookmark.model.dto.FoldersCreateDto;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Folder;
+import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Tag;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,18 @@ public class FolderService {
         }
 
         folderRepository.saveAll(entites);
+    }
+
+    @Transactional
+    public void updateFolder(long folderId, FolderUpdateDto folderUpdateDto, Long userId) {
+        Folder entity = getByFolderId(folderId);
+        if (!Objects.equals(entity.getUserId(), userId)) {
+            throw new RuntimeException("접근 불가능한 폴더입니다."); //TODO Exception Handler
+        }
+        Folder parentFolder = getParentFolder(folderUpdateDto.getParentFolderId(), userId);
+        Tag tag = tagService.getTag(folderUpdateDto.getTagId());
+        entity.update(parentFolder, tag, folderUpdateDto.getFolderName(), userId);
+        folderRepository.save(entity);
     }
 
     private Folder getParentFolder(Long parentFolderId, Long userId) {

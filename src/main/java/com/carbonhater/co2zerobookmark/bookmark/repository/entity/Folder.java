@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Setter
 @NoArgsConstructor
+@DynamicUpdate
 @Entity
 public class Folder extends BaseEntity {
 
@@ -45,6 +47,17 @@ public class Folder extends BaseEntity {
         setDeletedYN('N');
         setCreatedBy(now);
         setCreatedId(userId);
+        setModifiedBy(now);
+        setModifiedId(userId);
+    }
+
+    public void update(Folder parentFolder, Tag tag, String folderName, Long userId) {
+        this.folder = parentFolder;
+        this.tag = tag;
+        this.folderName = folderName;
+        //TODO Auditing
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String now = LocalDateTime.now().format(formatter);
         setModifiedBy(now);
         setModifiedId(userId);
     }
