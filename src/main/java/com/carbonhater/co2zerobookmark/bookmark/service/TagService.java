@@ -5,6 +5,7 @@ import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,5 +23,9 @@ public class TagService {
         return Optional.ofNullable(tagId)
                 .map(this::getTagById)
                 .orElse(null); // tagId가 null인 경우, null 반환 (태그 없음)
+    }
+
+    public List<Tag> getTags() {
+        return tagRepository.findActiveAll();
     }
 }
