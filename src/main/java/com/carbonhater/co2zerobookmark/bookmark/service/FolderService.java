@@ -67,4 +67,27 @@ public class FolderService {
         }
         return parentFolderEntity;
     }
+
+    @Transactional
+    public void deleteFolder(long folderId, Long userId) {
+        Folder entity = getByFolderId(folderId);
+        if (!Objects.equals(entity.getUserId(), userId)) {
+            throw new RuntimeException("접근 불가능한 폴더입니다."); //TODO Exception Handler
+        }
+        //하위 폴더 삭제
+        deleteSubFolders(entity, userId);
+
+        //상위 폴더 삭제
+        entity.delete(userId);
+        folderRepository.save(entity);
+    }
+
+    @Transactional
+    public void deleteSubFolders(Folder folder, Long userId) {
+        for (Folder subFolder : folder.getSubFolders()) {
+            deleteSubFolders(subFolder, userId);
+            subFolder.delete(userId);
+            folderRepository.save(subFolder);
+        }
+    }
 }

@@ -28,4 +28,11 @@ public class FolderController {
         folderService.updateFolder(id, folderUpdateDto, userId);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteFolder(@PathVariable long id) {
+        Long userId = 0L; //TODO 스프링 시큐리티 개발 필요
+        folderService.deleteFolder(id, userId);
+        return ResponseEntity.ok().build();
+    }
 }
