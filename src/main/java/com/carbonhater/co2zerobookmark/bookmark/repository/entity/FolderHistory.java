@@ -40,10 +40,10 @@ public class FolderHistory extends BaseEntity {
         this.folderName = folder.getFolderName();
         this.userId = folder.getUserId();
         //TODO Auditing
-        setDeletedYN(folder.getDeletedYN());
-        setCreatedBy(String.valueOf(now));
+        setDeletedYn(folder.getDeletedYn());
+        setCreatedAt(now);
         setCreatedId(folder.getUserId());
-        setModifiedBy(String.valueOf(now));
+        setModifiedAt(now);
         setModifiedId(folder.getUserId());
     }
 }

@@ -9,9 +9,9 @@ import java.util.Optional;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
-    @Query("select t from Tag t where t.deletedYN = 'N' and t.tagId = :id")
+    @Query("select t from Tag t where t.deletedYn = 'N' and t.tagId = :id")
     Optional<Tag> findActiveById(Long id);
 
-    @Query("select t from Tag t where t.deletedYN = 'N'")
+    @Query("select t from Tag t where t.deletedYn = 'N'")
     List<Tag> findActiveAll();
 }

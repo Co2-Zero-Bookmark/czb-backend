@@ -9,11 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -47,10 +44,10 @@ public class Folder extends BaseEntity {
         this.tag = tag;
         this.folderName = folderName;
         //TODO Auditing
-        setDeletedYN('N');
-        setCreatedBy(String.valueOf(now));
+        setDeletedYn('N');
+        setCreatedAt(now);
         setCreatedId(userId);
-        setModifiedBy(String.valueOf(now));
+        setModifiedAt(now);
         setModifiedId(userId);
     }
 
@@ -59,14 +56,14 @@ public class Folder extends BaseEntity {
         this.tag = tag;
         this.folderName = folderName;
         //TODO Auditing
-        setModifiedBy(String.valueOf(now));
+        setModifiedAt(now);
         setModifiedId(userId);
     }
 
     public void delete(Long userId, LocalDateTime now) {
-        setDeletedYN('Y');
+        setDeletedYn('Y');
         //TODO Auditing
-        setModifiedBy(String.valueOf(now));
+        setModifiedAt(now);
         setModifiedId(userId);
     }
 }

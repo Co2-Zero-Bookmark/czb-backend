@@ -9,9 +9,9 @@ import java.util.Optional;
 
 public interface FolderRepository extends JpaRepository<Folder, Long> {
 
-    @Query("select f from Folder f where f.deletedYN = 'N' and f.folderId = :id")
+    @Query("select f from Folder f where f.deletedYn = 'N' and f.folderId = :id")
     Optional<Folder> findActiveById(Long id);
 
-    @Query("select f from Folder f where f.deletedYN = 'N' and f.folder.folderId = :parentFolderId")
+    @Query("select f from Folder f where f.deletedYn = 'N' and f.folder.folderId = :parentFolderId")
     List<Folder> findActiveSubFolders(Long parentFolderId);
 }
