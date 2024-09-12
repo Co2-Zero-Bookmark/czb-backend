@@ -2,8 +2,14 @@ package com.carbonhater.co2zerobookmark.board.repository.entity;
 
 import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Board extends BaseEntity {
       @Id
       @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,5 +17,4 @@ public class Board extends BaseEntity {
       private Long userId;
       private String boardTitle;
       private String boardContent;
-
 }
