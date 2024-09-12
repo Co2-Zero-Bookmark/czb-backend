@@ -2,12 +2,16 @@ package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
 
 import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.ToString;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Getter
+@ToString
 @NoArgsConstructor
 @Entity
 public class FolderHistory extends BaseEntity {
@@ -18,9 +22,13 @@ public class FolderHistory extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "folder_id")
     private Folder folder;
+
     private Long parentFolderId;
+
     private Long tagId;
+
     private String folderName;
+
     private Long userId;
 
     @Builder

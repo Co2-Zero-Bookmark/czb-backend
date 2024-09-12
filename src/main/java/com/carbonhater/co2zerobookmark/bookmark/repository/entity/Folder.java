@@ -2,6 +2,8 @@ package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
 
 import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.ToString;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @DynamicUpdate
 @Entity
+@ToString
 public class Folder extends BaseEntity {
 
     @Id
