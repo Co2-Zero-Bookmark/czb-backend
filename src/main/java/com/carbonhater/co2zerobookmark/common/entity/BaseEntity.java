@@ -32,13 +32,13 @@ public class BaseEntity {
         private LocalDateTime createdAt;
 
         @CreatedBy
-        private long createdId;
+        private Long createdId;
 
         @LastModifiedDate
         private LocalDateTime modifiedAt;
 
         @LastModifiedBy
-        private long modifiedId;
+        private Long modifiedId;
 
         @PrePersist
         public void prePersist() {

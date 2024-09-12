@@ -1,14 +1,15 @@
-package com.carbonhater.co2zerobookmark.common.entity;
+package com.carbonhater.co2zerobookmark.board.repository.entity;
 
+import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "`like`")
 @Getter
 @ToString
-public class Like extends BaseEntity{
+@Table(name = "`like`")
+public class Like extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
