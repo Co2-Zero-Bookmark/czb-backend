@@ -5,6 +5,7 @@ import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkUpdateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +38,7 @@ public class BookmarkService {
                 .orElseThrow(() -> new RuntimeException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
 
-        // 현재 시간 기록
+//        // 현재 시간 기록
         LocalDateTime now = LocalDateTime.now();
         bookmark.setCreatedAt(now);
         bookmark.setModifiedAt(now);
@@ -68,11 +69,16 @@ public class BookmarkService {
                 .orElseThrow(() -> new EntityNotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
 //         현재 시간 기록
+/*        LocalDateTime now = LocalDateTime.now();
+        bookmark.setModifiedAt(now);
+        log.info("now" + String.valueOf(now));*/
         LocalDateTime now = LocalDateTime.now();
+        bookmark.setCreatedAt(now);
         bookmark.setModifiedAt(now);
 
         // 북마크 및 히스토리 저장
         Bookmark updatedBookmark = bookmarkRepository.save(bookmark);
+
         saveBookmarkHistory(updatedBookmark, updatedBookmark.getCreatedAt(), updatedBookmark.getModifiedAt());
 
         return updatedBookmark;
@@ -92,7 +98,7 @@ public class BookmarkService {
         bookmark.setModifiedAt(now);
 
         bookmarkRepository.save(bookmark);
-        saveBookmarkHistory(bookmark, bookmark.getCreatedAt(), bookmark.getModifiedAt());
+        saveBookmarkHistory(bookmark, now, now);
     }
 
 
