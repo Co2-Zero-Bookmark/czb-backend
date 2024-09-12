@@ -2,10 +2,17 @@ package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
 
 import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
+@ToString
 public class Bookmark extends BaseEntity {
 
     @Id
@@ -13,11 +20,13 @@ public class Bookmark extends BaseEntity {
     private Long bookmarkId;
 
     private String bookmarkName;
+
     private String bookmarkUrl;
 
-    private Date lastVisitedAt;
+    private LocalDateTime lastVisitedAt;
 
     @ManyToOne
     @JoinColumn(name = "folder_id")
     private Folder folder;
+
 }
