@@ -1,5 +1,6 @@
 package com.carbonhater.co2zerobookmark.common.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -9,22 +10,25 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
+
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
 
-        private char deletedYN;
+        @Column(name = "deleted_yn", columnDefinition = "char default 'N'")
+        private char deletedYn;
 
         @CreatedDate
-        private String createdBy;
+        private LocalDateTime createdAt;
 
         @CreatedBy
-        private long createdId;
+        private Long createdId;
 
         @LastModifiedDate
-        private String modifiedBy;
+        private LocalDateTime modifiedAt;
 
         @LastModifiedBy
-        private long modifiedId;
+        private Long modifiedId;
 }
