@@ -4,7 +4,6 @@ import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
