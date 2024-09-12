@@ -2,7 +2,13 @@ package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
 
 import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+@NoArgsConstructor
 @Entity
 public class FolderHistory extends BaseEntity {
     @Id
@@ -17,4 +23,19 @@ public class FolderHistory extends BaseEntity {
     private String folderName;
     private Long userId;
 
+    @Builder
+    public FolderHistory(Long folderHistoryId, Folder folder, LocalDateTime now) {
+        this.folderHistoryId = folderHistoryId;
+        this.folder = folder;
+        this.parentFolderId = Objects.isNull(folder.getFolder()) ? null : folder.getFolder().getFolderId();
+        this.tagId = Objects.isNull(folder.getTag()) ? null : folder.getTag().getTagId();
+        this.folderName = folder.getFolderName();
+        this.userId = folder.getUserId();
+        //TODO Auditing
+        setDeletedYN(folder.getDeletedYN());
+        setCreatedBy(String.valueOf(now));
+        setCreatedId(folder.getUserId());
+        setModifiedBy(String.valueOf(now));
+        setModifiedId(folder.getUserId());
+    }
 }

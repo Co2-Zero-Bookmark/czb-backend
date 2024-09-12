@@ -7,9 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,43 +36,34 @@ public class Folder extends BaseEntity {
 
     private String folderName;
 
-    @OneToMany(mappedBy = "folder")
-    private List<Folder> subFolders = new ArrayList<>(); // 하위 폴더 리스트 (양방향 매핑)
-
     @Builder
-    public Folder(Long folderId, Folder folder, Long userId, Tag tag, String folderName) {
+    public Folder(Long folderId, Folder folder, Long userId, Tag tag, String folderName, LocalDateTime now) {
         this.folderId = folderId;
         this.folder = folder;
         this.userId = userId;
         this.tag = tag;
         this.folderName = folderName;
         //TODO Auditing
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String now = LocalDateTime.now().format(formatter);
         setDeletedYN('N');
-        setCreatedBy(now);
+        setCreatedBy(String.valueOf(now));
         setCreatedId(userId);
-        setModifiedBy(now);
+        setModifiedBy(String.valueOf(now));
         setModifiedId(userId);
     }
 
-    public void update(Folder parentFolder, Tag tag, String folderName, Long userId) {
+    public void update(Folder parentFolder, Tag tag, String folderName, Long userId, LocalDateTime now) {
         this.folder = parentFolder;
         this.tag = tag;
         this.folderName = folderName;
         //TODO Auditing
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String now = LocalDateTime.now().format(formatter);
-        setModifiedBy(now);
+        setModifiedBy(String.valueOf(now));
         setModifiedId(userId);
     }
 
-    public void delete(Long userId) {
+    public void delete(Long userId, LocalDateTime now) {
         setDeletedYN('Y');
         //TODO Auditing
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String now = LocalDateTime.now().format(formatter);
-        setModifiedBy(now);
+        setModifiedBy(String.valueOf(now));
         setModifiedId(userId);
     }
 }
