@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 public class BookmarkUpdateDTO {
 
-//    private Long bookmarkId;
     private String bookmarkUrl;
     private String bookmarkName;
     private Long folderId;
