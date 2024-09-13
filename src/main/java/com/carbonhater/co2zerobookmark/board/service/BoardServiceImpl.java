@@ -4,6 +4,8 @@ package com.carbonhater.co2zerobookmark.board.service;
 import com.carbonhater.co2zerobookmark.board.model.BoardResponseDTO;
 import com.carbonhater.co2zerobookmark.board.repository.BoardRepository;
 import com.carbonhater.co2zerobookmark.board.repository.LikeRepository;
+import com.carbonhater.co2zerobookmark.board.repository.entity.Board;
+import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -21,8 +23,15 @@ public class BoardServiceImpl implements BoardService{
 
     @Override
     public List<BoardResponseDTO> getAllBoards() {
+        List<Board> boards = boardRepository.findAllBoardsByDeletedYn('N');
 
-        return boardRepository.findAllBoardsByDeletedYn('N').stream()
+        // 리스트가 비어있는지 확인하고 예외 던지기
+        if (boards.isEmpty()) {
+            throw new NotFoundException("게시판이 존재하지 않습니다");
+        }
+
+        // 전체 보드 리스트를 변환하여 반환
+        return boards.stream()
                 .map(board -> {
                     long likeCount = likeRepository.countByBoardIdAndDeletedYn(board.getBoardId(), 'N');
                     return BoardResponseDTO.builder()
