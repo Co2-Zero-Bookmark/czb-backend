@@ -1,6 +1,7 @@
 package com.carbonhater.co2zerobookmark.config;
 
 
+import io.swagger.v3.oas.models.info.Info;
 import jakarta.servlet.Filter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +27,20 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-//    @Autowired
-      // private final UserDetailsService userDetailsService;
+    @Autowired
+    private final UserDetailsService userDetailsService;
 //    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-//    public SecurityConfig(UserDetailsService userDetailsService) {
-//        this.userDetailsService = userDetailsService;
-//    }
-//    @Bean
-//    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-//
-//        return new BCryptPasswordEncoder();
-//    }
+    public SecurityConfig(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+
     @Bean
-    public PasswordEncoder getPasswordEncoder() {    return new BCryptPasswordEncoder();}
+    public PasswordEncoder getPasswordEncoder() {
+
+        return new BCryptPasswordEncoder();
+    }
 
 
     //antMatchers->requestMatchers
@@ -48,21 +49,17 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable())// CSRF 보호 비활성화 (REST 환경)
-                .formLogin((auth)->auth.disable())
-                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers("/api/v1/users/signup","api/v1/users/login","/api/v1/*").permitAll()
-                                 .anyRequest().authenticated())
+            .csrf(csrf -> csrf.disable())// CSRF 보호 비활성화 (REST 환경)
+            .formLogin((auth) -> auth.disable())
+                .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/api/v1/users/signup", "api/v1/users/login", "/api/v1/*").permitAll()
+                    .anyRequest().authenticated())
                 .sessionManagement((session) ->
-                                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-                return http.build();
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        return http.build();
 
     }
-
-
-
-
-
 
 
 }

@@ -5,9 +5,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-// User Entity 대신  시큐리티 처리하는 데이터 클래스
-public class CustomUserDetails implements UserDetails {
 
+public class CustomUserDetails implements UserDetails {
 
     private Long userId;
     private String email;
@@ -17,7 +16,7 @@ public class CustomUserDetails implements UserDetails {
     public CustomUserDetails(User user) {
         this.userId = user.getUserId();
         this.email = user.getUserEmail();
-        this.userPassword=user.getUserPassword();
+        this.userPassword = user.getUserPassword();
         this.userPoint = user.getUserPoint();
     }
 
@@ -28,12 +27,16 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.userPassword;
+        return this.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return this.email;
+        return this.getUsername();
+        /*
+            일반적인 로직에서는 this.email을 사용해도 되지만, Spring Security와
+            관련된 인증 절차에서는 getUsername()을 재정의해서 이메일을 반환하는 방식으로 처리
+         */
     }
 
     @Override
