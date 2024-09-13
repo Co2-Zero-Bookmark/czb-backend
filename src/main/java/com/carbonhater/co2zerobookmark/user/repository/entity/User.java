@@ -6,15 +6,17 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
+@Getter //entity는 setter x
 public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+    @Column(unique = true)
     private String userEmail;
+
     private String userPassword;
+
     private int userPoint;
 
 }

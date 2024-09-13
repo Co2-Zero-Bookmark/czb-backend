@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Getter
@@ -33,6 +32,5 @@ public class BookmarkHistory extends BaseEntity {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
-//    private LocalDateTime timestamp; // 시간 스냅샷
 
 }
