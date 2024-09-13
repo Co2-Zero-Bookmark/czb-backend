@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserDetailServiceImpl implements UserDetailsService {
 
@@ -24,13 +26,13 @@ public class UserDetailServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String userEmail) throws UsernameNotFoundException {
 
         //JPA Entity
-        User user = userRepository.findByUserEmail(userEmail);
-        if (user == null) {
+        Optional<User> user = userRepository.findByUserEmail(userEmail);
+        if (user.isEmpty()) {
             throw new UsernameNotFoundException("User not found");
         }
         //User Domain
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+        CustomUserDetails customUserDetails = new CustomUserDetails(user.get());
         return customUserDetails;
     }
 }
