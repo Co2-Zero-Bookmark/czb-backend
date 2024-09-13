@@ -35,7 +35,7 @@ public class BookmarkService {
 
         // 폴더 처리 로직
         Folder folder = folderRepository.findById(dto.getFolderId())
-                .orElseThrow(() -> new NotFoundException("폴더를 찾을 수 없습니다. 는 페이크"));
+                .orElseThrow(() -> new NotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
 
 //        // 현재 시간 기록
@@ -68,10 +68,7 @@ public class BookmarkService {
         Folder folder = folderRepository.findById(dto.getFolderId())
                 .orElseThrow(() -> new EntityNotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
-//         현재 시간 기록
-/*        LocalDateTime now = LocalDateTime.now();
-        bookmark.setModifiedAt(now);
-        log.info("now" + String.valueOf(now));*/
+
         LocalDateTime now = LocalDateTime.now();
         bookmark.setCreatedAt(now);
         bookmark.setModifiedAt(now);
