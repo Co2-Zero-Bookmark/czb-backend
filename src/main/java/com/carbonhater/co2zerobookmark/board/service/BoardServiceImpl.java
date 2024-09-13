@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,8 +30,8 @@ public class BoardServiceImpl implements BoardService{
             throw new NotFoundException("게시판이 존재하지 않습니다");
         }
 
-        // 전체 보드 리스트를 변환
-        List<BoardResponseDTO> boardResponseDTOs = boards.stream()
+        // 전체 보드 리스트를 변환하여 반환
+        return boards.stream()
                 .map(board -> {
                     long likeCount = likeRepository.countByBoardIdAndDeletedYn(board.getBoardId(), 'N');
                     return BoardResponseDTO.builder()
@@ -44,7 +43,5 @@ public class BoardServiceImpl implements BoardService{
                             .build();
                 })
                 .collect(Collectors.toList());
-
-        return boardResponseDTOs;
     }
 }
