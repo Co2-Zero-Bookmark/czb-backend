@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class CustomControllerAdvice {
 
-    private ResponseEntity<CustomResponseEntity> response(Throwable throwable, HttpStatus status) {
+    private ResponseEntity<CustomResponseEntity<Object>> response(Throwable throwable, HttpStatus status) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
-        System.out.println(new CustomResponseEntity(false, null, new CustomError(throwable.getMessage(), status)));
+        System.out.println(new CustomResponseEntity<>(false, null, new CustomError(throwable.getMessage(), status)));
         return new ResponseEntity<>(
-                new CustomResponseEntity(false, null, new CustomError(throwable.getMessage(), status))
+                new CustomResponseEntity<>(false, null, new CustomError(throwable.getMessage(), status))
                 , headers, status
         );
     }
