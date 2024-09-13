@@ -38,7 +38,7 @@ public class BookmarkService {
                 .orElseThrow(() -> new RuntimeException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
 
-//        // 현재 시간 기록
+        // 현재 시간 기록
         LocalDateTime now = LocalDateTime.now();
         bookmark.setCreatedAt(now);
         bookmark.setModifiedAt(now);
@@ -68,10 +68,8 @@ public class BookmarkService {
         Folder folder = folderRepository.findById(dto.getFolderId())
                 .orElseThrow(() -> new EntityNotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
-//         현재 시간 기록
-/*        LocalDateTime now = LocalDateTime.now();
-        bookmark.setModifiedAt(now);
-        log.info("now" + String.valueOf(now));*/
+
+        // 현재 시간 기록
         LocalDateTime now = LocalDateTime.now();
         bookmark.setCreatedAt(now);
         bookmark.setModifiedAt(now);
@@ -117,6 +115,24 @@ public class BookmarkService {
         bookmarkHistory.setModifiedId(bookmark.getModifiedId());
 
         bookmarkHistoryRepository.save(bookmarkHistory);
+    }
+
+    // 북마크 클릭 시 마지막 방문일시 업데이트
+    @Transactional
+    public Bookmark clickBookmark(Long bookmarkId){
+        Bookmark bookmark = bookmarkRepository.findById(bookmarkId)
+                .orElseThrow(() -> new EntityNotFoundException("북마크를 찾을 수 없습니다."));
+
+        // 마지막 방문일시 최신화
+        LocalDateTime now = LocalDateTime.now();
+        bookmark.setLastVisitedAt(now);
+
+        // 북마크 및 히스토리 저장
+        Bookmark updatedBookmark = bookmarkRepository.save(bookmark);
+
+        saveBookmarkHistory(updatedBookmark, updatedBookmark.getCreatedAt(), updatedBookmark.getModifiedAt());
+
+        return updatedBookmark;
     }
 
 
