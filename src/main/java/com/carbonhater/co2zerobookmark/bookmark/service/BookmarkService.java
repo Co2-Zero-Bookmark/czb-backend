@@ -5,7 +5,6 @@ import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkUpdateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
