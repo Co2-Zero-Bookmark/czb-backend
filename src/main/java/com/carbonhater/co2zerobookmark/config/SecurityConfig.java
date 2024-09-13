@@ -42,7 +42,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
     //antMatchers->requestMatchers
     //authorizeReuqest-> authorizeHttpRequest
     @Bean

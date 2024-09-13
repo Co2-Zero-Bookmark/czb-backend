@@ -2,8 +2,12 @@ package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
 
 import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.ToString;
 
 @Entity
+@Getter
+@ToString
 public class FolderHistory extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,9 +16,13 @@ public class FolderHistory extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "folder_id")
     private Folder folder;
+
     private Long parentFolderId;
+
     private Long tagId;
+
     private String folderName;
+
     private Long userId;
 
 }

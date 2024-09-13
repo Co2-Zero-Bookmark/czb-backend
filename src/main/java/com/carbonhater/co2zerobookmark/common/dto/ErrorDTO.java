@@ -1,3 +1,4 @@
+/*
 package com.carbonhater.co2zerobookmark.common.dto;
 
 import lombok.Builder;
@@ -26,3 +27,4 @@ public class ErrorDTO {
                         .build());
     }
 }
+*/

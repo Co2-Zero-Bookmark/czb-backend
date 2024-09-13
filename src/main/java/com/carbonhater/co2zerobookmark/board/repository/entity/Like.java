@@ -8,15 +8,12 @@ import lombok.ToString;
 @Entity
 @Getter
 @ToString
-public class BoardFolderRelation extends BaseEntity {
+@Table(name = "`like`")
+public class Like extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long relationId;
-
-    @ManyToOne
-    @JoinColumn(name = "board_id")
-    private Board board;
-
-    private Long folderId;
-
+    private Long likeId;
+    private Long userId;
+    private Long boardId;
 }
