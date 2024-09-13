@@ -46,4 +46,11 @@ public class FolderHistory extends BaseEntity {
         setModifiedAt(now);
         setModifiedId(folder.getUserId());
     }
+
+    public static FolderHistory create(Folder folder, LocalDateTime now) {
+        return FolderHistory.builder()
+                .folder(folder)
+                .now(now)
+                .build();
+    }
 }

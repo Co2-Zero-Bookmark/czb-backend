@@ -4,6 +4,7 @@ import com.carbonhater.co2zerobookmark.bookmark.model.dto.FolderUpdateDto;
 import com.carbonhater.co2zerobookmark.bookmark.model.dto.FoldersCreateDto;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderHistoryRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
+import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Bookmark;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Folder;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.FolderHistory;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Tag;
@@ -24,6 +25,7 @@ public class FolderService {
     private final FolderRepository folderRepository;
     private final FolderHistoryRepository folderHistoryRepository;
     private final TagService tagService;
+    private final BookmarkService bookmarkService;
 
     public Folder getByFolderId(Long folderId) {
         return folderRepository.findActiveById(folderId)
@@ -48,10 +50,7 @@ public class FolderService {
                     .now(now)
                     .build();
             folders.add(folderEntity);
-            histories.add(FolderHistory.builder()
-                    .folder(folderEntity)
-                    .now(now)
-                    .build());
+            histories.add(FolderHistory.create(folderEntity, now));
         }
 
         folderRepository.saveAll(folders);
@@ -63,17 +62,13 @@ public class FolderService {
         LocalDateTime now = LocalDateTime.now();
 
         Folder folder = getByFolderId(folderId);
-        if (!Objects.equals(folder.getUserId(), userId)) {
-            throw new RuntimeException("접근 불가능한 폴더입니다."); //TODO Exception Handler
-        }
+        validateUserAccess(folder, userId);
         Folder parentFolder = getParentFolder(folderUpdateDto.getParentFolderId(), userId);
         Tag tag = tagService.getTag(folderUpdateDto.getTagId());
+
         folder.update(parentFolder, tag, folderUpdateDto.getFolderName(), userId, now);
         folderRepository.save(folder);
-        folderHistoryRepository.save(FolderHistory.builder()
-                .folder(folder)
-                .now(now)
-                .build());
+        folderHistoryRepository.save(FolderHistory.create(folder, now));
     }
 
     private Folder getParentFolder(Long parentFolderId, Long userId) {
@@ -82,9 +77,8 @@ public class FolderService {
         }
 
         Folder parentFolderEntity = getByFolderId(parentFolderId);
-        if (!Objects.equals(parentFolderEntity.getUserId(), userId)) {
-            throw new RuntimeException("접근 불가능한 상위 폴더입니다."); //TODO Exception Handler
-        }
+        validateUserAccess(parentFolderEntity, userId);
+
         return parentFolderEntity;
     }
 
@@ -93,34 +87,32 @@ public class FolderService {
         LocalDateTime now = LocalDateTime.now();
 
         Folder folder = getByFolderId(folderId);
-        if (!Objects.equals(folder.getUserId(), userId)) {
-            throw new RuntimeException("접근 불가능한 폴더입니다."); //TODO Exception Handler
-        }
-        //하위 폴더 삭제
-        deleteSubFolders(folder, userId, now);
+        validateUserAccess(folder, userId);
 
-        //상위 폴더 삭제
-        //TODO 폴더에 포함된 북마크 삭제
-        folder.delete(userId, now);
-        folderRepository.save(folder);
-        folderHistoryRepository.save(FolderHistory.builder()
-                .folder(folder)
-                .now(now)
-                .build());
+        // 재귀적으로 하위 폴더 및 관련 북마크 삭제
+        deleteFolderAndSubFolders(folder, userId, now);
     }
 
-    @Transactional
-    public void deleteSubFolders(Folder folder, Long userId, LocalDateTime now) {
-        List<Folder> subFolders = folderRepository.findActiveSubFolders(folder.getFolderId());
-        for (Folder subFolder : subFolders) {
-            //TODO 폴더에 포함된 북마크 삭제
-            deleteSubFolders(subFolder, userId, now);
-            subFolder.delete(userId, now);
-            folderRepository.save(subFolder);
-            folderHistoryRepository.save(FolderHistory.builder()
-                    .folder(subFolder)
-                    .now(now)
-                    .build());
+    private void deleteFolderAndSubFolders(Folder folder, Long userId, LocalDateTime now) {
+        // 하위 폴더 삭제 (재귀 호출)
+        for (Folder subFolder : folderRepository.findActiveSubFolders(folder.getFolderId())) {
+            deleteFolderAndSubFolders(subFolder, userId, now);
+        }
+
+        // 현재 폴더 삭제 처리
+        folder.delete(userId, now);
+        folderRepository.save(folder);
+        folderHistoryRepository.save(FolderHistory.create(folder, now));
+
+        // 폴더에 포함된 북마크 삭제
+        bookmarkService.findAllByFolder(folder).stream()
+                .map(Bookmark::getBookmarkId)
+                .forEach(bookmarkService::deleteBookmark);
+    }
+
+    private void validateUserAccess(Folder folder, Long userId) {
+        if (!Objects.equals(folder.getUserId(), userId)) {
+            throw new RuntimeException("접근 불가능한 폴더입니다."); // TODO Exception Handler
         }
     }
 }

@@ -22,6 +22,10 @@ public class BookmarkService {
     private final FolderRepository folderRepository;
     private final BookmarkHistoryRepository bookmarkHistoryRepository;
 
+    public List<Bookmark> findAllByFolder(Folder folder) {
+        return bookmarkRepository.findActiveByFolder(folder);
+    }
+
     // 삭제되지 않은 북마크 조회
     public List<Bookmark> getActiveBookmarks() {
         return bookmarkRepository.findByDeletedYn('N');
