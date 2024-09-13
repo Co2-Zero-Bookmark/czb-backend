@@ -3,7 +3,6 @@ package com.carbonhater.co2zerobookmark.user.service.impl;
 import com.carbonhater.co2zerobookmark.user.repository.UserRepository;
 import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
 import com.carbonhater.co2zerobookmark.user.repository.entity.User;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,9 +29,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
         if (user.isEmpty()) {
             throw new UsernameNotFoundException("User not found");
         }
-        //User Domain
-
-        CustomUserDetails customUserDetails = new CustomUserDetails(user.get());
-        return customUserDetails;
+        return new CustomUserDetails(user.get());
     }
 }

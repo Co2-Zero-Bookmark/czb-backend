@@ -27,12 +27,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.getPassword();
+        return this.userPassword;
     }
 
     @Override
     public String getUsername() {
-        return this.getUsername();
+        return this.email;
         /*
             일반적인 로직에서는 this.email을 사용해도 되지만, Spring Security와
             관련된 인증 절차에서는 getUsername()을 재정의해서 이메일을 반환하는 방식으로 처리
