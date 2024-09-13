@@ -1,6 +1,5 @@
 package com.carbonhater.co2zerobookmark.bookmark.controller;
 
-import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkCreateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkCreateListDTO;
 import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkUpdateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Bookmark;
@@ -19,11 +18,7 @@ public class BookmarkController {
 
     private final BookmarkService bookmarkService;
 
-/*    @PostMapping("")
-    public ResponseEntity<Bookmark> createBookmark(@RequestBody BookmarkCreateDTO dto){
-        Bookmark bookmark = bookmarkService.createBookmark(dto);
-        return ResponseEntity.ok(bookmark);
-    }*/
+    // 북마크 생성
     @PostMapping("")
     public ResponseEntity<List<Bookmark>> createBookmarks(@RequestBody BookmarkCreateListDTO request){
         List<Bookmark> bookmarks = request.getBookmarks().stream()
@@ -32,16 +27,27 @@ public class BookmarkController {
         return ResponseEntity.ok(bookmarks);
     }
 
+    // 북마크 수정
     @PutMapping("/{bookmarkId}")
     public ResponseEntity<Bookmark> updateBookmark(@PathVariable Long bookmarkId, @RequestBody BookmarkUpdateDTO dto){
         Bookmark bookmark = bookmarkService.updateBookmark(bookmarkId, dto);
         return ResponseEntity.ok(bookmark);
     }
 
+    // 북마크 삭제
     @DeleteMapping("/{bookmarkId}")
     public ResponseEntity<Void> deleteBookmark(@PathVariable Long bookmarkId){
         bookmarkService.deleteBookmark(bookmarkId);
         return ResponseEntity.noContent().build(); // 삭제 후, 응답 본문이 없음을 나타냄
     }
+
+    // 북마크 클릭
+    @PostMapping("/{bookmarkId}/click")
+    public ResponseEntity<Void> clickBookmark(@PathVariable Long bookmarkId){
+        bookmarkService.clickBookmark(bookmarkId);
+        return ResponseEntity.ok().build();
+    }
+
+
 
 }

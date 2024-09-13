@@ -117,6 +117,7 @@ public class BookmarkService {
         bookmarkHistoryRepository.save(bookmarkHistory);
     }
 
+
     // 북마크 클릭 시 마지막 방문일시 업데이트
     @Transactional
     public Bookmark clickBookmark(Long bookmarkId){
