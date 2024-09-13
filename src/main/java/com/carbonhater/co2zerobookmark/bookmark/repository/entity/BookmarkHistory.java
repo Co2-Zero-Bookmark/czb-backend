@@ -33,6 +33,5 @@ public class BookmarkHistory extends BaseEntity {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
-//    private LocalDateTime timestamp; // 시간 스냅샷
 
 }

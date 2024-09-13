@@ -23,10 +23,7 @@ import java.time.LocalDateTime;
 public class BaseEntity {
 
         private char deletedYn;
-/*
-        @CreatedDate
-        private String createdAt;
-*/
+
         @CreatedDate
         @Column(updatable = false)
         private LocalDateTime createdAt;
