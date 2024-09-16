@@ -2,9 +2,11 @@ package com.carbonhater.co2zerobookmark.board.service;
 
 
 import com.carbonhater.co2zerobookmark.board.model.BoardResponseDTO;
+import com.carbonhater.co2zerobookmark.board.model.LikeRequestDTO;
 import com.carbonhater.co2zerobookmark.board.repository.BoardRepository;
 import com.carbonhater.co2zerobookmark.board.repository.LikeRepository;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Board;
+import com.carbonhater.co2zerobookmark.board.repository.entity.Like;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -43,5 +45,29 @@ public class BoardServiceImpl implements BoardService{
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String likeBoard(LikeRequestDTO likeRequestDTO) {
+        // 좋아요 요청을 처리하는 비즈니스 로직
+        // 이전에 userId와 BoardId가 유효한지 봐야 한다.
+        Like like = likeRepository.save(Like.builder()
+                .boardId(likeRequestDTO.getBoardId())
+                .userId(likeRequestDTO.getUserId())
+                .build());
+
+        return "좋아요에 성공했습니다.";
+    }
+
+    @Override
+    public String dislikeBoard(LikeRequestDTO likeRequestDTO) {
+        // 좋아요 취소 요청을 처리하는 비즈니스 로직
+        Like like = likeRepository.save(Like.builder()
+                .userId(likeRequestDTO.getUserId())
+                .boardId(likeRequestDTO.getBoardId())
+                .deletedYn('Y')
+                .build());
+
+        return "좋아요 해제에 성공했습니다.";
     }
 }
