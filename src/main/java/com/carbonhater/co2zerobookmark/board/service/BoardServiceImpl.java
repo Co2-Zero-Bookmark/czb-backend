@@ -49,8 +49,10 @@ public class BoardServiceImpl implements BoardService{
 
     @Override
     public String likeBoard(LikeRequestDTO likeRequestDTO) {
-        // 좋아요 요청을 처리하는 비즈니스 로직
         // 이전에 userId와 BoardId가 유효한지 봐야 한다.
+        boardRepository.findByBoardIdAndDeletedYn(likeRequestDTO.getBoardId(), 'N')
+                .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
+
         Like like = likeRepository.save(Like.builder()
                 .boardId(likeRequestDTO.getBoardId())
                 .userId(likeRequestDTO.getUserId())
@@ -61,7 +63,9 @@ public class BoardServiceImpl implements BoardService{
 
     @Override
     public String dislikeBoard(LikeRequestDTO likeRequestDTO) {
-        // 좋아요 취소 요청을 처리하는 비즈니스 로직
+        boardRepository.findByBoardIdAndDeletedYn(likeRequestDTO.getBoardId(), 'N')
+                .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
+
         Like like = likeRepository.save(Like.builder()
                 .userId(likeRequestDTO.getUserId())
                 .boardId(likeRequestDTO.getBoardId())
