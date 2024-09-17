@@ -22,8 +22,9 @@ public class BoardController {
 
     @GetMapping("")
     public CustomResponseEntity<List<BoardResponseDTO>> getBoards(){
+            Long userId = 2L;
             log.info("getBoards Controller");
-            return success(boardService.getAllBoards());
+            return success(boardService.getAllBoards(userId));
     }
 
     @PostMapping("/{boardId}/like")
