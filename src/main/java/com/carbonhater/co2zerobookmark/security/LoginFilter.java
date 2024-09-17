@@ -1,5 +1,6 @@
 package com.carbonhater.co2zerobookmark.security;
 
+import com.carbonhater.co2zerobookmark.jwt.JWTTokenProvider;
 import com.carbonhater.co2zerobookmark.user.model.UserRole;
 import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
 import jakarta.servlet.FilterChain;
@@ -18,12 +19,14 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
-    private final JWTUtil jwtUtil;
+    private final JWTTokenProvider jwtUtil;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTTokenProvider jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
@@ -46,12 +49,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String username = customUserDetails.getUsername();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next();
-
-        String role = UserRole.ADMIN.getValue();
+//        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+//        GrantedAuthority auth = iterator.next();
+        List<String> roles = authorities.stream()
+                .map(GrantedAuthority::getAuthority)  // GrantedAuthority에서 역할 이름 추출
+                .collect(Collectors.toList());
+//        String role = UserRole.ADMIN.getValue();
         // 뽑아낸 username, role을 기반으로 jwt토큰 생성
-        String token = jwtUtil.createJwt(username, role, 60 * 60 * 10L); // expiredMS accessToken 유지시간
+        String token = jwtUtil.createToken(username, roles ); // expiredMS accessToken 유지시간
 
         response.addHeader("Authorization", "Bearer " + token);
 

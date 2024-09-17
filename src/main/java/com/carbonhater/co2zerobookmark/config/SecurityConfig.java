@@ -1,7 +1,8 @@
 package com.carbonhater.co2zerobookmark.config;
 
 
-import com.carbonhater.co2zerobookmark.security.JWTFilter;
+import com.carbonhater.co2zerobookmark.jwt.JWTAuthenticationFilter;
+//import com.carbonhater.co2zerobookmark.security.JWTFilter;
 import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
 import io.swagger.v3.oas.models.info.Info;
 import jakarta.servlet.Filter;
@@ -27,7 +28,7 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 
 //LoginFilter와 JwtUtil import
 import com.carbonhater.co2zerobookmark.security.LoginFilter;
-import com.carbonhater.co2zerobookmark.security.JWTUtil;
+import com.carbonhater.co2zerobookmark.jwt.JWTTokenProvider;
 import com.carbonhater.co2zerobookmark.user.service.impl.CustomUserDetailServiceImpl;
 import com.carbonhater.co2zerobookmark.user.repository.entity.User;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -42,16 +43,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
     private AuthenticationConfiguration authenticationConfiguration;
     //JWTUtil 주입
-    private final JWTUtil jwtUtil;
-    @Autowired
-    private final CustomUserDetailServiceImpl customUserDetailsService; // CustomUserDetailServiceImpl 주입
-//    @Autowired
+    private JWTTokenProvider jwtUtil;
 //    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, CustomUserDetailServiceImpl customUserDetailsService) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTTokenProvider jwtUtil ) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
-        this.customUserDetailsService = customUserDetailsService;
     }
 
 
@@ -67,11 +64,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())// CSRF 보호 비활성화 (REST 환경)
                 .formLogin((auth) -> auth.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/users/signup", "api/v1/users/login", "/api/v1/*").permitAll()
+                        .requestMatchers("/api/v1/users/signup", "/api/v1/users/login", "/api/v1/*").permitAll()
                         .anyRequest().authenticated())
+                .userDetailsService(userDetailsService())
                 .sessionManagement((session) ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
+                .addFilterBefore(new JWTAuthenticationFilter(jwtUtil), LoginFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 //                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
 //                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -81,6 +79,7 @@ public class SecurityConfig {
     }
 
     // UserDetailsService 빈으로 등록
+
     @Bean
     public UserDetailsService userDetailsService() {
         User user1 = User.builder()

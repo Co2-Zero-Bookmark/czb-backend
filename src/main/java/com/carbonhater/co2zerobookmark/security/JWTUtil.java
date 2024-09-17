@@ -21,9 +21,10 @@ public class JWTUtil {
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
 
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        // applicaton.properties에 미미 저장해놓은 키 기반으로 객체 키 생성
+        secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
+
+
 
     public String getUsername(String token) {
 

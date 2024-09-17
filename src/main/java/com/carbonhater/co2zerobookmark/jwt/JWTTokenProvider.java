@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JWTTokenProvider {
     @Autowired
+    @Lazy
     private UserDetailsService userDetailsService;
 
     @Value("${spring.jwt.secret}")
@@ -96,9 +98,8 @@ public class JWTTokenProvider {
     public String resolveToken( HttpServletRequest request ) {
         System.out.println("START - JwtTokenProvider - resolveToken");
 
-        String tmpStr = request.getHeader("X-AUTH-TOKEN");
-
-        System.out.println("X-AUTH-TOKEN : " + tmpStr);
+        String tmpStr = request.getHeader("Authorization");
+        System.out.println("Authorization-TOKEN : " + tmpStr);
         System.out.println("END - JwtTokenProvider - resolveToken");
 
         return tmpStr;

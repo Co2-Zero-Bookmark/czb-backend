@@ -56,3 +56,22 @@ public class WebController {
     }
 }
 
+/*
+todo JWTUtil=> JWTTokenProvider로 변경
+
+ @PostMapping("/login")
+    public Map<String, String> login(@RequestBody Map<String, String> user) {
+        String username = user.get("username");
+        String password = user.get("password");
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
+
+        String token = jwtTokenProvider.createToken(username, "ROLE_USER");
+
+        Map<String, String> response = new HashMap<>();
+        response.put("accessToken", token);
+        return response;
+    }
+ */
