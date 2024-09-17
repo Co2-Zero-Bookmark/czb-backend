@@ -12,5 +12,6 @@ public class BoardResponseDTO {
     private String boardTitle;
     private String boardContent;
     private Long boardLikeCount;
+    private Boolean boardIsLiked;
 
 }
