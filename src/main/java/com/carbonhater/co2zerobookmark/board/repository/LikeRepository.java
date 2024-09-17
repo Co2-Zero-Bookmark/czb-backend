@@ -15,4 +15,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     List<Like> findAllByUserIdAndDeletedYn(Long userId, char n);
 
     Optional<Like> findByBoardIdAndUserIdAndDeletedYn(Long boardId, Long userId, char n);
+
+    Object countByBoardId(long l);
 }
