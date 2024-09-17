@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
+@Setter
 @Getter //entity는 setter x
 public class User extends BaseEntity {
 
@@ -17,6 +18,6 @@ public class User extends BaseEntity {
 
     private String userPassword;
 
-    private int userPoint;
+    private String role;
 
 }
