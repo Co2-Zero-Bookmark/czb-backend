@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BoardService {
 
-    List<BoardResponseDTO> getAllBoards();
+    List<BoardResponseDTO> getAllBoards(Long userId);
 
     String likeBoard(LikeRequestDTO likeRequestDTO);
 

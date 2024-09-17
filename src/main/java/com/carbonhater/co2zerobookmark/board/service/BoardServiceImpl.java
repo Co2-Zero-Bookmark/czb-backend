@@ -78,11 +78,19 @@ public class BoardServiceImpl implements BoardService{
         boardRepository.findByBoardIdAndDeletedYn(likeRequestDTO.getBoardId(), 'N')
                 .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
 
-        Like like = likeRepository.save(Like.builder()
-                .userId(likeRequestDTO.getUserId())
-                .boardId(likeRequestDTO.getBoardId())
-                .deletedYn('Y')
-                .build());
+        Optional<Like> likeOptional = likeRepository.findByBoardIdAndUserIdAndDeletedYn(
+                likeRequestDTO.getBoardId(),
+                likeRequestDTO.getUserId(),
+                'N'
+        );
+
+        if (likeOptional.isPresent()) {
+            Like like = likeOptional.get();
+            like.setDeletedYn('Y');
+            likeRepository.save(like);
+        } else {
+            throw new NotFoundException("좋아요가 설정되어 있지 않았습니다.");
+        }
 
         return "좋아요 해제에 성공했습니다.";
     }
