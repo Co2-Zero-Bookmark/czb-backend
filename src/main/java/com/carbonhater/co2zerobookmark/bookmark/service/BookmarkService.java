@@ -2,6 +2,9 @@ package com.carbonhater.co2zerobookmark.bookmark.service;
 
 import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkCreateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkUpdateDTO;
+import com.carbonhater.co2zerobookmark.bookmark.repository.BookmarkHistoryRepository;
+import com.carbonhater.co2zerobookmark.bookmark.repository.BookmarkRepository;
+import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.*;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,6 +22,10 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
     private final FolderRepository folderRepository;
     private final BookmarkHistoryRepository bookmarkHistoryRepository;
+
+    public List<Bookmark> findAllByFolder(Folder folder) {
+        return bookmarkRepository.findActiveByFolder(folder);
+    }
 
     // 삭제되지 않은 북마크 조회
     public List<Bookmark> getActiveBookmarks() {
