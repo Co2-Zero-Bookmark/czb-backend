@@ -2,6 +2,7 @@ package com.carbonhater.co2zerobookmark.config;
 
 
 import com.carbonhater.co2zerobookmark.security.JWTFilter;
+import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
 import io.swagger.v3.oas.models.info.Info;
 import jakarta.servlet.Filter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,10 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 import com.carbonhater.co2zerobookmark.security.LoginFilter;
 import com.carbonhater.co2zerobookmark.security.JWTUtil;
 import com.carbonhater.co2zerobookmark.user.service.impl.CustomUserDetailServiceImpl;
+import com.carbonhater.co2zerobookmark.user.repository.entity.User;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+import java.util.Arrays;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -35,10 +40,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
     //JWTUtil 주입
-    @Autowired
     private final JWTUtil jwtUtil;
     @Autowired
     private final CustomUserDetailServiceImpl customUserDetailsService; // CustomUserDetailServiceImpl 주입
@@ -80,7 +83,19 @@ public class SecurityConfig {
     // UserDetailsService 빈으로 등록
     @Bean
     public UserDetailsService userDetailsService() {
-        return customUserDetailsService;  // CustomUserDetailServiceImpl 등록
+        User user1 = User.builder()
+                .userEmail("user1")
+                .userPassword(getPasswordEncoder().encode("0001"))
+                .role("ROLE_ADMIN")
+                .build();
+
+        User user2 = User.builder()
+                .userEmail("user2")
+                .userPassword(getPasswordEncoder().encode("0002"))
+                .role("ROLE_ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(Arrays.asList(new CustomUserDetails(user1),new CustomUserDetails(user2)));  // CustomUserDetailServiceImpl 등록
     }
 
     @Bean
@@ -103,8 +118,8 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
-        return NoOpPasswordEncoder.getInstance(); // 평문 비밀번호 비교( 오직 테스트용 )
-//        return new BCryptPasswordEncoder();
+//        return NoOpPasswordEncoder.getInstance(); // 평문 비밀번호 비교( 오직 테스트용 )
+        return new BCryptPasswordEncoder();
     }
 
 }

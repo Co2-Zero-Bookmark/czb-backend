@@ -15,12 +15,13 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class JWTUtil {
-
     private SecretKey secretKey;
+//    @Value("${jwt.expiration}")
+//    private long jwtExpiration;
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
 
-        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         // applicaton.properties에 미미 저장해놓은 키 기반으로 객체 키 생성
     }
 
@@ -54,4 +55,6 @@ public class JWTUtil {
     public String resolveToken(HttpServletRequest request) {
         return request.getHeader("Authorization");
     }
+
+
 }

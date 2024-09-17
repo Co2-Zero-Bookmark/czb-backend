@@ -8,11 +8,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+  jwt:
+    secret: flature!@#
 springdoc:
   swagger-ui:
     groups-order: DESC
