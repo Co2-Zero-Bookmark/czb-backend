@@ -32,5 +32,6 @@ public class BookmarkHistory extends BaseEntity {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
+    private Long userId;
 
 }
