@@ -7,9 +7,12 @@ import com.carbonhater.co2zerobookmark.board.repository.BoardRepository;
 import com.carbonhater.co2zerobookmark.board.repository.LikeRepository;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Board;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Like;
+import com.carbonhater.co2zerobookmark.common.exception.CustomException;
+import com.carbonhater.co2zerobookmark.common.exception.CustomRuntimeException;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -65,12 +68,17 @@ public class BoardServiceImpl implements BoardService{
         boardRepository.findByBoardIdAndDeletedYn(likeRequestDTO.getBoardId(), 'N')
                 .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
 
-        Like like = likeRepository.save(Like.builder()
-                .boardId(likeRequestDTO.getBoardId())
-                .userId(likeRequestDTO.getUserId())
-                .build());
-
-        return "좋아요에 성공했습니다.";
+        try {
+            likeRepository.save(Like.builder()
+                    .boardId(likeRequestDTO.getBoardId())
+                    .userId(likeRequestDTO.getUserId())
+                    .build());
+            return "좋아요에 성공했습니다.";
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomRuntimeException("좋아요 저장 중 데이터 무결성 오류가 발생했습니다.");
+        } catch (Exception e) {
+            throw new CustomRuntimeException("좋아요 저장 중 오류가 발생했습니다.");
+        }
     }
 
     @Override
