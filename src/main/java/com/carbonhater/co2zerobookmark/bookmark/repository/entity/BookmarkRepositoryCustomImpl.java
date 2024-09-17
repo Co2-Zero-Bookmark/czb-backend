@@ -24,12 +24,13 @@ public class BookmarkRepositoryCustomImpl implements BookmarkRepositoryCustom {
         BooleanExpression nameCondition = (bookmarkName != null && !bookmarkName.trim().isEmpty())
                 ? bookmark.bookmarkName.containsIgnoreCase(bookmarkName)
                 : null;
+        BooleanExpression deletedCondition = bookmark.deletedYn.eq('N'); // 삭제되지 않은 북마크만
 
         // 동적 정렬 조건
         OrderSpecifier<?> sortOrder = getSortOrder(bookmark, sort, order);
 
         return queryFactory.selectFrom(bookmark)
-                .where(nameCondition)
+                .where(deletedCondition, nameCondition) // 삭제 조건 및 이름 조건을 모두 추가
                 .orderBy(sortOrder)
                 .offset(offset)
                 .limit(limit)
