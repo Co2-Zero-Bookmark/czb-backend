@@ -7,7 +7,6 @@ import com.carbonhater.co2zerobookmark.board.repository.BoardRepository;
 import com.carbonhater.co2zerobookmark.board.repository.LikeRepository;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Board;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Like;
-import com.carbonhater.co2zerobookmark.common.exception.CustomException;
 import com.carbonhater.co2zerobookmark.common.exception.CustomRuntimeException;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
