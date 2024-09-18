@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
@@ -33,7 +31,7 @@ public class JWTTokenProvider {
     @Value("${spring.jwt.secret}")
     private String secretKey = "secretKey";
 
-    private SecretKey secretKeySpec;
+
     private final long tokenValidMillisecond = 1000L * 60 * 60;
 
     @PostConstruct
@@ -44,7 +42,6 @@ public class JWTTokenProvider {
         secretKey
                 = Base64.getEncoder()
                 .encodeToString( secretKey.getBytes(StandardCharsets.UTF_8) );
-        secretKeySpec = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
         System.out.println("secretKey : " + secretKey);
         System.out.println("END - JwtTokenProvider - init");
@@ -53,9 +50,7 @@ public class JWTTokenProvider {
     public String createToken( String userUid, List<String> roles ) {
         System.out.println("START - JwtTokenProvider - createToken");
 
-        Claims claims = (Claims) Jwts.claims().setSubject(userUid).setIssuedAt(new Date());
-        claims.put("roles", roles);
-        ; // subject - uid
+        Claims claims = (Claims) Jwts.claims().setSubject(userUid); // subject - uid
         claims.put("roles", roles);
 
         Date now = new Date();
@@ -65,7 +60,7 @@ public class JWTTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration( new Date(now.getTime() + tokenValidMillisecond) )
-                .signWith( secretKeySpec, SignatureAlgorithm.HS256)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
         System.out.println("token : " + token);
@@ -78,17 +73,18 @@ public class JWTTokenProvider {
         System.out.println("START - JwtTokenProvider - getUsername");
 
         String info = Jwts.parser()
-                .setSigningKey(secretKeySpec)
-                .build().parseClaimsJws(token)
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
                 .getBody()
-                .getSubject();
+                        .getSubject();
+//                .get("username", String.class);
 
         System.out.println("info : " + info);
         System.out.println("END - JwtTokenProvider - getUsername");
 
         return info;
     } // getUsername
-    public Authentication getAuthentication(String token ) {
+    public Authentication getAuthentication(String token) {
         System.out.println("START - JwtTokenProvider - getAuthentication");
 
         UserDetails userDetails
@@ -102,12 +98,10 @@ public class JWTTokenProvider {
 
     public String resolveToken( HttpServletRequest request ) {
         System.out.println("START - JwtTokenProvider - resolveToken");
-
         String tmpStr = request.getHeader("Authorization");
-        System.out.println("Authorization-TOKEN : " + tmpStr);
-        System.out.println("END - JwtTokenProvider - resolveToken");
-
-        return tmpStr;
+        if(tmpStr.startsWith("Bearer "))
+            return tmpStr.substring(7);
+       return null;
     }
     public boolean validateToken( String token ) {
         System.out.println("START - JwtTokenProvider - validateToken");
@@ -116,7 +110,7 @@ public class JWTTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser()
                     .setSigningKey(secretKey)
-                    .build().parseClaimsJws(token);
+                    .parseClaimsJws(token);
             tmpBool = !claims.getBody().getExpiration().before(new Date());
         } catch(Exception e) {
             tmpBool = false;

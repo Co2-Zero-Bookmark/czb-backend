@@ -51,12 +51,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 //        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
 //        GrantedAuthority auth = iterator.next();
-        List<String> roles = authorities.stream()
-                .map(GrantedAuthority::getAuthority)  // GrantedAuthority에서 역할 이름 추출
-                .collect(Collectors.toList());
+//        List<String> roles = authorities.stream()
+//                .map(GrantedAuthority::getAuthority)  // GrantedAuthority에서 역할 이름 추출
+//                .collect(Collectors.toList());
 //        String role = UserRole.ADMIN.getValue();
         // 뽑아낸 username, role을 기반으로 jwt토큰 생성
-        String token = jwtUtil.createToken(username, roles ); // expiredMS accessToken 유지시간
+        String token = jwtUtil.createToken(username, Collections.singletonList("ROLE_ADMIN") ); // expiredMS accessToken 유지시간
 
         response.addHeader("Authorization", "Bearer " + token);
 

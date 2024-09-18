@@ -2,6 +2,9 @@ package com.carbonhater.co2zerobookmark.bookmark.service;
 
 import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkCreateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkUpdateDTO;
+import com.carbonhater.co2zerobookmark.bookmark.repository.BookmarkHistoryRepository;
+import com.carbonhater.co2zerobookmark.bookmark.repository.BookmarkRepository;
+import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.*;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
 @Service
 @RequiredArgsConstructor
 public class BookmarkService {
@@ -19,6 +23,10 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
     private final FolderRepository folderRepository;
     private final BookmarkHistoryRepository bookmarkHistoryRepository;
+
+    public List<Bookmark> findAllByFolder(Folder folder) {
+        return bookmarkRepository.findActiveByFolder(folder);
+    }
 
     // 삭제되지 않은 북마크 조회
     public List<Bookmark> getActiveBookmarks() {
@@ -68,7 +76,7 @@ public class BookmarkService {
         Folder folder = folderRepository.findById(dto.getFolderId())
                 .orElseThrow(() -> new EntityNotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
-      
+
         LocalDateTime now = LocalDateTime.now();
         bookmark.setCreatedAt(now);
         bookmark.setModifiedAt(now);

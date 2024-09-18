@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .formLogin((auth) -> auth.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/users/sign-up", "/api/v1/users/login", "/api/v1/*").permitAll()
+                        .requestMatchers("/api/v1/folders/**").authenticated()
                         .anyRequest().authenticated())
 //                .userDetailsService(userDetailsService()) todo
                 .sessionManagement((session) ->
