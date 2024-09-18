@@ -32,7 +32,7 @@ public class JWTTokenProvider {
     private String secretKey = "secretKey";
 
 
-    private final long tokenValidMillisecond = 1000L * 60 * 60;
+    private final long tokenValidMillisecond = 1000L * 60 * 60 * 24 * 7; //1주일
 
     @PostConstruct
     protected void init() {
@@ -41,16 +41,16 @@ public class JWTTokenProvider {
 
         secretKey
                 = Base64.getEncoder()
-                .encodeToString( secretKey.getBytes(StandardCharsets.UTF_8) );
+                .encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
 
         System.out.println("secretKey : " + secretKey);
         System.out.println("END - JwtTokenProvider - init");
-    } // init
+    }
 
-    public String createToken( String userUid, List<String> roles ) {
+    public String createToken(String userUid, List<String> roles) {
         System.out.println("START - JwtTokenProvider - createToken");
 
-        Claims claims = (Claims) Jwts.claims().setSubject(userUid); // subject - uid
+        Claims claims = (Claims) Jwts.claims().setSubject(userUid);
         claims.put("roles", roles);
 
         Date now = new Date();
@@ -59,7 +59,7 @@ public class JWTTokenProvider {
                 = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration( new Date(now.getTime() + tokenValidMillisecond) )
+                .setExpiration(new Date(now.getTime() + tokenValidMillisecond))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
@@ -67,43 +67,44 @@ public class JWTTokenProvider {
         System.out.println("END - JwtTokenProvider - createToken");
 
         return token;
-    } // createToken
+    }
 
-    public String getUsername( String token ) {
+    public String getUsername(String token) {
         System.out.println("START - JwtTokenProvider - getUsername");
 
         String info = Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody()
-                        .getSubject();
-//                .get("username", String.class);
+                .getSubject();
 
         System.out.println("info : " + info);
         System.out.println("END - JwtTokenProvider - getUsername");
 
         return info;
     } // getUsername
+
     public Authentication getAuthentication(String token) {
         System.out.println("START - JwtTokenProvider - getAuthentication");
 
         UserDetails userDetails
-                = userDetailsService.loadUserByUsername( this.getUsername(token) );
+                = userDetailsService.loadUserByUsername(this.getUsername(token));
 
-        System.out.println("username : " + userDetails.getUsername());
+        System.out.println("username : == " + userDetails.getUsername());
         System.out.println("END - JwtTokenProvider - getAuthentication");
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-    } // getAuthentication
+    }
 
-    public String resolveToken( HttpServletRequest request ) {
+    public String resolveToken(HttpServletRequest request) {
         System.out.println("START - JwtTokenProvider - resolveToken");
         String tmpStr = request.getHeader("Authorization");
-        if(tmpStr.startsWith("Bearer "))
+        if (tmpStr != null && tmpStr.startsWith("Bearer "))
             return tmpStr.substring(7);
-       return null;
+        return null;
     }
-    public boolean validateToken( String token ) {
+
+    public boolean validateToken(String token) {
         System.out.println("START - JwtTokenProvider - validateToken");
 
         boolean tmpBool = false;
@@ -112,7 +113,7 @@ public class JWTTokenProvider {
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token);
             tmpBool = !claims.getBody().getExpiration().before(new Date());
-        } catch(Exception e) {
+        } catch (Exception e) {
             tmpBool = false;
         }
 
@@ -120,7 +121,7 @@ public class JWTTokenProvider {
         System.out.println("END - JwtTokenProvider - validateToken");
 
         return tmpBool;
-    } // validateToken
+    }
 
 }
 
