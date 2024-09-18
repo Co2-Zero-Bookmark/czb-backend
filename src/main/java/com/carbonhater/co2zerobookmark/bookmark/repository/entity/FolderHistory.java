@@ -31,7 +31,6 @@ public class FolderHistory extends BaseEntity {
 
     private Long userId;
 
-
     @Builder
     public FolderHistory(Long folderHistoryId, Folder folder, LocalDateTime now) {
         this.folderHistoryId = folderHistoryId;
@@ -47,7 +46,6 @@ public class FolderHistory extends BaseEntity {
         setModifiedAt(now);
         setModifiedId(folder.getUserId());
     }
-
 
     public static FolderHistory create(Folder folder, LocalDateTime now) {
         return FolderHistory.builder()

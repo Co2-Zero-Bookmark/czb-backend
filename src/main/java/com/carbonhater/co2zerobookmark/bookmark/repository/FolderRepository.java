@@ -12,9 +12,6 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
     @Query("select f from Folder f where f.deletedYn = 'N' and f.folderId = :id")
     Optional<Folder> findActiveById(Long id);
 
-    @Query("select f from Folder f where f.deletedYn = 'N' and f.userId = :userId and f.folder is null")
-    List<Folder> findByUserIdAndFolderIsNull(Long userId);
-
-    @Query("select f from Folder f where f.deletedYn = 'N' and f.userId = :userId and f.folder = :folder")
-    List<Folder> findByFolderAndUserId(Folder folder, Long userId);
+    @Query("select f from Folder f where f.deletedYn = 'N' and f.folder.folderId = :parentFolderId")
+    List<Folder> findActiveSubFolders(Long parentFolderId);
 }

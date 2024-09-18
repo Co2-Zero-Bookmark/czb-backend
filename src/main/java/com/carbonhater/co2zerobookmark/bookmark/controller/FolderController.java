@@ -6,7 +6,6 @@ import com.carbonhater.co2zerobookmark.bookmark.service.FolderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,9 +17,8 @@ public class FolderController {
 
     @PostMapping
     public ResponseEntity<Object> createFolders(@RequestBody FoldersCreateDto foldersCreateDto) {
-//        Long userId = 0L;
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();//TODO 스프링 시큐리티 개발필요
-//        folderService.createFolders(foldersCreateDto, userEmail);
+        Long userId = 0L; //TODO 스프링 시큐리티 개발필요
+        folderService.createFolders(foldersCreateDto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -31,10 +29,10 @@ public class FolderController {
         return ResponseEntity.ok().build();
     }
 
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Object> deleteFolder(@PathVariable long id) {
-//        Long userId = 0L; //TODO 스프링 시큐리티 개발 필요
-//        folderService.deleteFolder(id, userId);
-//        return ResponseEntity.ok().build();
-//    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteFolder(@PathVariable long id) {
+        Long userId = 0L; //TODO 스프링 시큐리티 개발 필요
+        folderService.deleteFolder(id, userId);
+        return ResponseEntity.ok().build();
+    }
 }

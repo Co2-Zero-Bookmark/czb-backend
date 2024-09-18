@@ -24,17 +24,18 @@ public class Folder extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long folderId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_folder_id")
     private Folder folder;
 
     private Long userId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag")
     private Tag tag;
 
     private String folderName;
+
     @Builder
     public Folder(Long folderId, Folder folder, Long userId, Tag tag, String folderName, LocalDateTime now) {
         this.folderId = folderId;

@@ -82,33 +82,33 @@ public class FolderService {
         return parentFolderEntity;
     }
 
-//    @Transactional
-//    public void deleteFolder(long folderId, Long userId) {
-//        LocalDateTime now = LocalDateTime.now();
-//
-//        Folder folder = getByFolderId(folderId);
-//        validateUserAccess(folder, userId);
-//
-//        // 재귀적으로 하위 폴더 및 관련 북마크 삭제
-//        deleteFolderAndSubFolders(folder, userId, now);
-//    }
+    @Transactional
+    public void deleteFolder(long folderId, Long userId) {
+        LocalDateTime now = LocalDateTime.now();
 
-//    private void deleteFolderAndSubFolders(Folder folder, Long userId, LocalDateTime now) {
-//        // 하위 폴더 삭제 (재귀 호출)
-//        for (Folder subFolder : folderRepository.findActiveSubFolders(folder.getFolderId())) {
-//            deleteFolderAndSubFolders(subFolder, userId, now);
-//        }
-//
-//        // 현재 폴더 삭제 처리
-//        folder.delete(userId, now);
-//        folderRepository.save(folder);
-//        folderHistoryRepository.save(FolderHistory.create(folder, now));
-//
-//        // 폴더에 포함된 북마크 삭제
-//        bookmarkService.findAllByFolder(folder).stream()
-//                .map(Bookmark::getBookmarkId)
-//                .forEach(bookmarkService::deleteBookmark);
-//    }
+        Folder folder = getByFolderId(folderId);
+        validateUserAccess(folder, userId);
+
+        // 재귀적으로 하위 폴더 및 관련 북마크 삭제
+        deleteFolderAndSubFolders(folder, userId, now);
+    }
+
+    private void deleteFolderAndSubFolders(Folder folder, Long userId, LocalDateTime now) {
+        // 하위 폴더 삭제 (재귀 호출)
+        for (Folder subFolder : folderRepository.findActiveSubFolders(folder.getFolderId())) {
+            deleteFolderAndSubFolders(subFolder, userId, now);
+        }
+
+        // 현재 폴더 삭제 처리
+        folder.delete(userId, now);
+        folderRepository.save(folder);
+        folderHistoryRepository.save(FolderHistory.create(folder, now));
+
+        // 폴더에 포함된 북마크 삭제
+        bookmarkService.findAllByFolder(folder).stream()
+                .map(Bookmark::getBookmarkId)
+                .forEach(bookmarkService::deleteBookmark);
+    }
 
     private void validateUserAccess(Folder folder, Long userId) {
         if (!Objects.equals(folder.getUserId(), userId)) {
