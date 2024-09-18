@@ -2,12 +2,14 @@ package com.carbonhater.co2zerobookmark.user.repository.entity;
 
 import com.carbonhater.co2zerobookmark.user.service.impl.CustomUserDetailServiceImpl;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -17,7 +19,7 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
-    //    @Override
+//    @Override
 //    public Collection<? extends GrantedAuthority> getAuthorities() {
 //        Collection<GrantedAuthority> collection = new ArrayList<>();
 //
@@ -31,18 +33,7 @@ public class CustomUserDetails implements UserDetails {
 //    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-
-        collection.add(new GrantedAuthority() {
-
-            @Override
-            public String getAuthority() {
-
-                return user.getRole();
-            }
-        });
-
-        return collection;
+        return this.user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
     // 사용자 역할을 반환
 

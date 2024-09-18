@@ -2,7 +2,6 @@ package com.carbonhater.co2zerobookmark.config;
 
 
 import com.carbonhater.co2zerobookmark.jwt.JWTAuthenticationFilter;
-//import com.carbonhater.co2zerobookmark.security.JWTFilter;
 import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
 import io.swagger.v3.oas.models.info.Info;
 import jakarta.servlet.Filter;
@@ -32,8 +31,9 @@ import com.carbonhater.co2zerobookmark.jwt.JWTTokenProvider;
 import com.carbonhater.co2zerobookmark.user.service.impl.CustomUserDetailServiceImpl;
 import com.carbonhater.co2zerobookmark.user.repository.entity.User;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-
-import java.util.Arrays;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.Collections;
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -64,9 +64,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())// CSRF 보호 비활성화 (REST 환경)
                 .formLogin((auth) -> auth.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/users/signup", "/api/v1/users/login", "/api/v1/*").permitAll()
+                        .requestMatchers("/api/v1/users/sign-up", "/api/v1/users/login", "/api/v1/*").permitAll()
                         .anyRequest().authenticated())
-                .userDetailsService(userDetailsService())
+//                .userDetailsService(userDetailsService()) todo
                 .sessionManagement((session) ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JWTAuthenticationFilter(jwtUtil), LoginFilter.class)
@@ -80,22 +80,7 @@ public class SecurityConfig {
 
     // UserDetailsService 빈으로 등록
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        User user1 = User.builder()
-                .userEmail("user1")
-                .userPassword(getPasswordEncoder().encode("0001"))
-                .role("ROLE_ADMIN")
-                .build();
 
-        User user2 = User.builder()
-                .userEmail("user2")
-                .userPassword(getPasswordEncoder().encode("0002"))
-                .role("ROLE_ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(Arrays.asList(new CustomUserDetails(user1),new CustomUserDetails(user2)));  // CustomUserDetailServiceImpl 등록
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -114,9 +99,9 @@ public class SecurityConfig {
 ////        return authenticationManagerBuilder.build();
 //    }
 
-
+//
     @Bean
-    public PasswordEncoder getPasswordEncoder() {
+    public PasswordEncoder passwordEncoder() {
 //        return NoOpPasswordEncoder.getInstance(); // 평문 비밀번호 비교( 오직 테스트용 )
         return new BCryptPasswordEncoder();
     }

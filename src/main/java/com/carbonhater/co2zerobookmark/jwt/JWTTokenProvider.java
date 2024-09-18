@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
@@ -31,7 +33,7 @@ public class JWTTokenProvider {
     @Value("${spring.jwt.secret}")
     private String secretKey = "secretKey";
 
-
+    private SecretKey secretKeySpec;
     private final long tokenValidMillisecond = 1000L * 60 * 60;
 
     @PostConstruct
@@ -42,6 +44,7 @@ public class JWTTokenProvider {
         secretKey
                 = Base64.getEncoder()
                 .encodeToString( secretKey.getBytes(StandardCharsets.UTF_8) );
+        secretKeySpec = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
         System.out.println("secretKey : " + secretKey);
         System.out.println("END - JwtTokenProvider - init");
@@ -50,7 +53,9 @@ public class JWTTokenProvider {
     public String createToken( String userUid, List<String> roles ) {
         System.out.println("START - JwtTokenProvider - createToken");
 
-        Claims claims = (Claims) Jwts.claims().setSubject(userUid); // subject - uid
+        Claims claims = (Claims) Jwts.claims().setSubject(userUid).setIssuedAt(new Date());
+        claims.put("roles", roles);
+        ; // subject - uid
         claims.put("roles", roles);
 
         Date now = new Date();
@@ -60,7 +65,7 @@ public class JWTTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration( new Date(now.getTime() + tokenValidMillisecond) )
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith( secretKeySpec, SignatureAlgorithm.HS256)
                 .compact();
 
         System.out.println("token : " + token);
@@ -73,7 +78,7 @@ public class JWTTokenProvider {
         System.out.println("START - JwtTokenProvider - getUsername");
 
         String info = Jwts.parser()
-                .setSigningKey(secretKey)
+                .setSigningKey(secretKeySpec)
                 .build().parseClaimsJws(token)
                 .getBody()
                 .getSubject();
