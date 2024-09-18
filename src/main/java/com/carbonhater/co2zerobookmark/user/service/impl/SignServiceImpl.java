@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -82,6 +83,14 @@ public class SignServiceImpl implements SignService {
             return new SignInResultDTO(false, 401, "Login failed: " + e.getMessage());
         }
     }
+
+    @Override
+    public Long getUserIdByEmail(String email) {
+        User user = userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        return user.getUserId();
+    }
+
     public void setSuccessResult( SignUpResultDto result ) {
         result.setSuccess(true);
         result.setCode(200);

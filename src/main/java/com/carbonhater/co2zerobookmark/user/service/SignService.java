@@ -12,4 +12,6 @@ public interface SignService {
     public SignUpResultDto signUp(String username, String password, String role);
 
     public SignInResultDTO signIn( UserDTO loginRequestDTO);
+    // getUserIdByEmail 메서드 로직: 이메일을 기반으로 사용자 ID를 가져오는 로직
+    public Long getUserIdByEmail(String email);
 }
