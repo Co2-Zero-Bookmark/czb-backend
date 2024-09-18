@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 @Service
 @RequiredArgsConstructor
 public class BookmarkService {
@@ -35,7 +34,7 @@ public class BookmarkService {
 
     // 북마크 생성
     @Transactional
-    public Bookmark createBookmark(BookmarkCreateDTO dto){
+    public Bookmark createBookmark(BookmarkCreateDTO dto,Long userId){
         Bookmark bookmark = new Bookmark();
         bookmark.setBookmarkName(dto.getBookmarkName());
         bookmark.setBookmarkUrl(dto.getBookmarkUrl());
