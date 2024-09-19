@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
+public interface BookmarkRepository extends JpaRepository<Bookmark, Long>, BookmarkRepositoryCustom {
     List<Bookmark> findByDeletedYn(char deletedYn);
 
     @Query("select b from Bookmark b where b.deletedYn = 'N' and b.folder = :folder")

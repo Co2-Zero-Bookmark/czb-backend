@@ -1,5 +1,7 @@
-package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
+package com.carbonhater.co2zerobookmark.bookmark.repository;
 
+import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Bookmark;
+import com.carbonhater.co2zerobookmark.bookmark.repository.entity.QBookmark;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
