@@ -2,7 +2,6 @@ package com.carbonhater.co2zerobookmark.bookmark.model.dto;
 
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Bookmark;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Folder;
-import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 @Setter
 public class FolderHierarchyDto {
 
-    private List<FolderDto> folders;
+    private FolderDto parentFolder;
 
     @NoArgsConstructor
     @Getter
@@ -34,23 +33,6 @@ public class FolderHierarchyDto {
             this.tag = new TagDto(folderEntity.getTag());
             this.subFolders = subFolders.stream().map(subFolder -> new FolderDto(subFolder, List.of(), List.of())).collect(Collectors.toList());
             this.bookmarks = bookmarks.stream().map(BookmarkDto::new).collect(Collectors.toList());
-        }
-    }
-
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    public static class TagDto {
-        private Long tagId;
-        private String tagName;
-        private String tagColorCode;
-        private String tagDescription;
-
-        public TagDto(Tag tag) {
-            this.tagId = tag.getTagId();
-            this.tagName = tag.getTagName();
-            this.tagColorCode = tag.getTagColorCode();
-            this.tagDescription = tag.getTagDescription();
         }
     }
 
