@@ -34,7 +34,7 @@ public class BookmarkService {
 
     // 북마크 생성
     @Transactional
-    public Bookmark createBookmark(BookmarkCreateDTO dto){
+    public Bookmark createBookmark(BookmarkCreateDTO dto,Long userId){
         Bookmark bookmark = new Bookmark();
         bookmark.setBookmarkName(dto.getBookmarkName());
         bookmark.setBookmarkUrl(dto.getBookmarkUrl());
@@ -77,7 +77,7 @@ public class BookmarkService {
         Folder folder = folderRepository.findById(dto.getFolderId())
                 .orElseThrow(() -> new EntityNotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
-      
+
         LocalDateTime now = LocalDateTime.now();
         bookmark.setCreatedAt(now);
         bookmark.setModifiedAt(now);
