@@ -48,6 +48,17 @@ public class BookmarkController {
         return ResponseEntity.ok().build();
     }
 
-
+    // 북마크 조회
+    @GetMapping
+    public ResponseEntity<List<Bookmark>> getBookmarks(
+            @RequestParam(value = "bookmarkName", required = false) String bookmarkName,
+            @RequestParam(value = "offset", defaultValue = "0") int offset,
+            @RequestParam(value = "limit", defaultValue = "10") int limit,
+            @RequestParam(value = "sort", defaultValue = "lastVisitedAt") String sort,
+            @RequestParam(value = "order", defaultValue = "asc") String order
+    ) {
+        List<Bookmark> bookmarks = bookmarkService.getBookmarks(bookmarkName, offset, limit, sort, order);
+        return ResponseEntity.ok(bookmarks);
+    }
 
 }

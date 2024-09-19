@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Getter
@@ -28,5 +27,7 @@ public class Bookmark extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "folder_id")
     private Folder folder;
+
+    private Long userId;
 
 }
