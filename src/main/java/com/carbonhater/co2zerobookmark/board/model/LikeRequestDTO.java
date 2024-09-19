@@ -5,13 +5,7 @@ import lombok.Data;
 
 @Builder
 @Data
-public class BoardResponseDTO {
-
+public class LikeRequestDTO {
     private Long boardId;
     private Long userId;
-    private String boardTitle;
-    private String boardContent;
-    private Long boardLikeCount;
-    private Boolean boardIsLiked;
-
 }

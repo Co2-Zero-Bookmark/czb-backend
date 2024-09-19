@@ -2,7 +2,11 @@ package com.carbonhater.co2zerobookmark.bookmark.service;
 
 import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkCreateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkUpdateDTO;
+import com.carbonhater.co2zerobookmark.bookmark.repository.BookmarkHistoryRepository;
+import com.carbonhater.co2zerobookmark.bookmark.repository.BookmarkRepository;
+import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.*;
+import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,10 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
     private final FolderRepository folderRepository;
     private final BookmarkHistoryRepository bookmarkHistoryRepository;
+
+    public List<Bookmark> findAllByFolder(Folder folder) {
+        return bookmarkRepository.findActiveByFolder(folder);
+    }
 
     // 삭제되지 않은 북마크 조회
     public List<Bookmark> getActiveBookmarks() {
@@ -36,7 +44,7 @@ public class BookmarkService {
 
         // 폴더 처리 로직
         Folder folder = folderRepository.findById(dto.getFolderId())
-                .orElseThrow(() -> new RuntimeException("폴더를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
 
         // 현재 시간 기록
@@ -55,7 +63,7 @@ public class BookmarkService {
     @Transactional
     public Bookmark updateBookmark(Long bookmarkId, BookmarkUpdateDTO dto) {
         Bookmark bookmark = bookmarkRepository.findById(bookmarkId)
-                .orElseThrow(() -> new EntityNotFoundException("북마크를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("북마크를 찾을 수 없습니다."));
 
         // 삭제된 북마크는 수정할 수 없도록 처리하는 로직
         if(bookmark.getDeletedYn() == 'Y') {
@@ -69,8 +77,7 @@ public class BookmarkService {
         Folder folder = folderRepository.findById(dto.getFolderId())
                 .orElseThrow(() -> new EntityNotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
-
-        // 현재 시간 기록
+      
         LocalDateTime now = LocalDateTime.now();
         bookmark.setCreatedAt(now);
         bookmark.setModifiedAt(now);

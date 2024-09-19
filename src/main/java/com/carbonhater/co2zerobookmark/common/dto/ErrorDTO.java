@@ -17,7 +17,7 @@ public class ErrorDTO {
 
     public static ResponseEntity<ErrorDTO> toResponseEntity(CustomException ex){
         ErrorCode errorType = ex.getErrorCode();
-        String detail = ex.getDetail();
+        String detail = ex.getMessage();
 
         return ResponseEntity.status(ex.getStatus())
                 .body(ErrorDTO.builder()
