@@ -18,6 +18,12 @@ public class FolderController {
     private final FolderService folderService;
     private final SignService signService;
 
+    @GetMapping
+    public ResponseEntity<Object> getFolders() {
+        long userId = 0L; //TODO 스프링 시큐리티 개발 필요
+        return ResponseEntity.ok().body(folderService.getFolderHierarchyByUserId(userId));
+    }
+
     @PostMapping
     public ResponseEntity<Object> createFolders(@RequestBody FoldersCreateDto foldersCreateDto) {
 //        String userId = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -34,7 +34,7 @@ public class BookmarkController {
 
     // 북마크 수정
     @PutMapping("/{bookmarkId}")
-    public ResponseEntity<Bookmark> updateBookmark(@PathVariable Long bookmarkId, @RequestBody BookmarkUpdateDTO dto) {
+    public ResponseEntity<Bookmark> updateBookmark(@PathVariable Long bookmarkId, @RequestBody BookmarkUpdateDTO dto){
         Bookmark bookmark = bookmarkService.updateBookmark(bookmarkId, dto);
         return ResponseEntity.ok(bookmark);
     }
@@ -52,6 +52,7 @@ public class BookmarkController {
         bookmarkService.clickBookmark(bookmarkId);
         return ResponseEntity.ok().build();
     }
+
 
 
 }

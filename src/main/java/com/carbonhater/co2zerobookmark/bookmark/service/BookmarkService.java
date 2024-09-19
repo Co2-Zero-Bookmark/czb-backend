@@ -38,6 +38,8 @@ public class BookmarkService {
         Bookmark bookmark = new Bookmark();
         bookmark.setBookmarkName(dto.getBookmarkName());
         bookmark.setBookmarkUrl(dto.getBookmarkUrl());
+        bookmark.setCreatedId(1L); // 임의설정 ID:1
+        bookmark.setModifiedId(1L);
         // folder 처리 로직 필요
 
         // 폴더 처리 로직
@@ -130,6 +132,11 @@ public class BookmarkService {
         Bookmark bookmark = bookmarkRepository.findById(bookmarkId)
                 .orElseThrow(() -> new EntityNotFoundException("북마크를 찾을 수 없습니다."));
 
+        // 삭제된 북마크는 수정할 수 없도록 처리하는 로직
+        if(bookmark.getDeletedYn() == 'Y') {
+            throw new IllegalArgumentException("삭제된 북마크는 클릭할 수 없습니다.");
+        }
+
         // 마지막 방문일시 최신화
         LocalDateTime now = LocalDateTime.now();
         bookmark.setLastVisitedAt(now);
@@ -140,6 +147,11 @@ public class BookmarkService {
         saveBookmarkHistory(updatedBookmark, updatedBookmark.getCreatedAt(), updatedBookmark.getModifiedAt());
 
         return updatedBookmark;
+    }
+
+    // 쿼리 호출
+    public List<Bookmark> getBookmarks(String bookmarkName, int offset, int limit, String sort, String order) {
+        return bookmarkRepository.searchBookmarks(bookmarkName, sort, order, offset, limit);
     }
 
 
