@@ -1,13 +1,11 @@
 package com.carbonhater.co2zerobookmark.config;
 
 
+
 import com.carbonhater.co2zerobookmark.jwt.JWTAuthenticationFilter;
 import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
 import io.swagger.v3.oas.models.info.Info;
-import jakarta.servlet.Filter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // BCry
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
@@ -36,6 +35,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
+
 
 //비밀번호 암호화 관련: PasswordEncoder의 구현체 대입 -> Bean 등록
 @Configuration
@@ -64,7 +64,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())// CSRF 보호 비활성화 (REST 환경)
                 .formLogin((auth) -> auth.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/users/sign-up", "/api/v1/users/login", "/api/v1/*").permitAll()
+
+                        .requestMatchers("/api/v1/users/sign-up", "/api/v1/users/login", "/api/v1/**").permitAll()
                         .requestMatchers("/api/v1/folders/**").authenticated()
                         .anyRequest().authenticated())
 //                .userDetailsService(userDetailsService()) todo

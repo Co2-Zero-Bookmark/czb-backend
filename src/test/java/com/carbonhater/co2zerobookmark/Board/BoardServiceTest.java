@@ -45,7 +45,7 @@ public class BoardServiceTest {
         when(likeRepository.countByBoardId(2L)).thenReturn(3L);
 
         // 서비스 메소드 호출
-        List<BoardResponseDTO> result = boardService.getAllBoards();
+        List<BoardResponseDTO> result = boardService.getAllBoards(2L);
 
         // 결과 검증
         assertEquals(2, result.size());
