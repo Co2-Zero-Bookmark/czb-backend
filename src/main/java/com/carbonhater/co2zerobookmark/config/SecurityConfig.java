@@ -3,9 +3,6 @@ package com.carbonhater.co2zerobookmark.config;
 
 import com.carbonhater.co2zerobookmark.jwt.JWTAuthenticationFilter;
 import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
-import io.swagger.v3.oas.models.info.Info;
-import jakarta.servlet.Filter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +31,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Collections;
 import java.util.List;
+import jakarta.servlet.Filter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
