@@ -3,6 +3,9 @@ package com.carbonhater.co2zerobookmark.config;
 
 import com.carbonhater.co2zerobookmark.jwt.JWTAuthenticationFilter;
 import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
+import io.swagger.v3.oas.models.info.Info;
+import jakarta.servlet.Filter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.annotation.Bean;
@@ -38,25 +41,24 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Autowired
-    private final UserDetailsService userDetailsService;
+    private AuthenticationConfiguration authenticationConfiguration;
+    //JWTUtil 주입
+    private JWTTokenProvider jwtUtil;
 //    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTTokenProvider jwtUtil ) {
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtil = jwtUtil;
     }
 
-
-    @Bean
-    public PasswordEncoder getPasswordEncoder() {
-
-        return new BCryptPasswordEncoder();
-    }
 
     //antMatchers->requestMatchers
     //authorizeReuqest-> authorizeHttpRequest
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        // LoginFilter 등록
+//        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil);
+
 
         http
                 .csrf(csrf -> csrf.disable())// CSRF 보호 비활성화 (REST 환경)
