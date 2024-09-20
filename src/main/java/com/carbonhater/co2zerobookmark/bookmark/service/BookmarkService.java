@@ -6,8 +6,8 @@ import com.carbonhater.co2zerobookmark.bookmark.repository.BookmarkHistoryReposi
 import com.carbonhater.co2zerobookmark.bookmark.repository.BookmarkRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.*;
+import com.carbonhater.co2zerobookmark.common.exception.IllegalParameterException;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,13 +38,19 @@ public class BookmarkService {
         Bookmark bookmark = new Bookmark();
         bookmark.setBookmarkName(dto.getBookmarkName());
         bookmark.setBookmarkUrl(dto.getBookmarkUrl());
-        bookmark.setCreatedId(1L); // 임의설정 ID:1
-        bookmark.setModifiedId(1L);
+        bookmark.setCreatedId(userId); // 들어온 유저 ID
+        bookmark.setModifiedId(userId);
+        bookmark.setUserId(userId);
         // folder 처리 로직 필요
 
         // 폴더 처리 로직
         Folder folder = folderRepository.findById(dto.getFolderId())
                 .orElseThrow(() -> new NotFoundException("폴더를 찾을 수 없습니다."));
+        // 부모 폴더에 북마크 생성 불가 처리
+        if(folder.getFolder() == null){
+            throw new IllegalParameterException("상위 계층 폴더에는 생성할 수 없습니다.");
+        }
+
         bookmark.setFolder(folder);
 
         // 현재 시간 기록
@@ -61,21 +67,23 @@ public class BookmarkService {
 
     // 북마크 수정
     @Transactional
-    public Bookmark updateBookmark(Long bookmarkId, BookmarkUpdateDTO dto) {
+    public Bookmark updateBookmark(Long bookmarkId, BookmarkUpdateDTO dto, Long userId) {
         Bookmark bookmark = bookmarkRepository.findById(bookmarkId)
-                .orElseThrow(() -> new RuntimeException("북마크를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("북마크를 찾을 수 없습니다."));
 
         // 삭제된 북마크는 수정할 수 없도록 처리하는 로직
         if(bookmark.getDeletedYn() == 'Y') {
-            throw new IllegalArgumentException("삭제된 북마크는 수정할 수 없습니다.");
+            throw new IllegalParameterException("삭제된 북마크는 수정할 수 없습니다.");
         }
 
         bookmark.setBookmarkName(dto.getBookmarkName());
         bookmark.setBookmarkUrl(dto.getBookmarkUrl());
+        bookmark.setModifiedId(userId);
+        bookmark.setUserId(userId);
 
         // 폴더 처리 로직
         Folder folder = folderRepository.findById(dto.getFolderId())
-                .orElseThrow(() -> new EntityNotFoundException("폴더를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("폴더를 찾을 수 없습니다."));
         bookmark.setFolder(folder);
 
         LocalDateTime now = LocalDateTime.now();
@@ -92,15 +100,16 @@ public class BookmarkService {
 
     // 북마크 논리 삭제
     @Transactional
-    public void deleteBookmark(Long bookmarkId) {
+    public void deleteBookmark(Long bookmarkId, Long userId) {
         Bookmark bookmark = bookmarkRepository.findById(bookmarkId)
-                .orElseThrow(() -> new IllegalArgumentException("북마크를 찾을 수 없습니다.")); // 예외 처리 코드
+                .orElseThrow(() -> new NotFoundException("북마크를 찾을 수 없습니다.")); // 예외 처리 코드
 
         //현재 시간 기록
         LocalDateTime now = LocalDateTime.now();
 
         bookmark.setDeletedYn('Y');
-
+        bookmark.setModifiedId(userId);
+        bookmark.setUserId(userId);
         bookmark.setModifiedAt(now);
 
         bookmarkRepository.save(bookmark);
@@ -112,7 +121,7 @@ public class BookmarkService {
     private void saveBookmarkHistory(Bookmark bookmark, LocalDateTime createdAt, LocalDateTime modifiedAt){
         BookmarkHistory bookmarkHistory = new BookmarkHistory();
         bookmarkHistory.setBookmark(bookmark);
-        bookmarkHistory.setFolderId(bookmark.getFolder().getFolderId());
+        bookmarkHistory.setFolderId(bookmark.getFolder());
         bookmarkHistory.setBookmarkName(bookmark.getBookmarkName());
         bookmarkHistory.setBookmarkUrl(bookmark.getBookmarkUrl());
         bookmarkHistory.setLastVisitedDatetime(bookmark.getLastVisitedAt());
@@ -128,13 +137,13 @@ public class BookmarkService {
 
     // 북마크 클릭 시 마지막 방문일시 업데이트
     @Transactional
-    public Bookmark clickBookmark(Long bookmarkId){
+    public Bookmark clickBookmark(Long bookmarkId, Long userId){
         Bookmark bookmark = bookmarkRepository.findById(bookmarkId)
-                .orElseThrow(() -> new EntityNotFoundException("북마크를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("북마크를 찾을 수 없습니다."));
 
         // 삭제된 북마크는 수정할 수 없도록 처리하는 로직
         if(bookmark.getDeletedYn() == 'Y') {
-            throw new IllegalArgumentException("삭제된 북마크는 클릭할 수 없습니다.");
+            throw new IllegalParameterException("삭제된 북마크는 클릭할 수 없습니다.");
         }
 
         // 마지막 방문일시 최신화
@@ -150,8 +159,8 @@ public class BookmarkService {
     }
 
     // 쿼리 호출
-    public List<Bookmark> getBookmarks(String bookmarkName, int offset, int limit, String sort, String order) {
-        return bookmarkRepository.searchBookmarks(bookmarkName, sort, order, offset, limit);
+    public List<Bookmark> getBookmarks(String bookmarkName, Long userId, int offset, int limit, String sort, String order) {
+        return bookmarkRepository.searchBookmarks(bookmarkName, userId, sort, order, offset, limit);
     }
 
 

@@ -12,4 +12,9 @@ public class BookmarkCreateDTO {
     private String bookmarkUrl;
     private Long folderId;
 
+    @Override
+    public String toString() {
+        return "BookmarkCreateDTO [bookmarkName=" + bookmarkName + ", bookmarkUrl=" + bookmarkUrl + ", folderId=" + folderId + "]";
+    }
+
 }
