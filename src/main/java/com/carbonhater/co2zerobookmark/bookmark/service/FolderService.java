@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -39,25 +38,18 @@ public class FolderService {
     public void createFolders(FoldersCreateDto foldersCreateDto, Long userId) {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Folder> folders = new ArrayList<>();
-        List<FolderHistory> histories = new ArrayList<>();
         for (FolderUpdateDto folder : foldersCreateDto.getFolders()) {
             if (Strings.isBlank(folder.getFolderName())) {
                 throw new BadRequestException("폴더 이름은 필수입니다.");
             }
-            Folder folderEntity = Folder.builder()
+            this.saveFolderWithHistory(Folder.builder()
                     .folder(this.getParentFolder(folder.getParentFolderId(), userId))
                     .userId(userId)
                     .tag(tagService.getTag(folder.getTagId()))
                     .folderName(folder.getFolderName())
                     .now(now)
-                    .build();
-            folders.add(folderEntity);
-            histories.add(FolderHistory.create(folderEntity, now));
+                    .build());
         }
-
-        folderRepository.saveAll(folders);
-        folderHistoryRepository.saveAll(histories);
     }
 
     @Transactional
@@ -65,13 +57,12 @@ public class FolderService {
         LocalDateTime now = LocalDateTime.now();
 
         Folder folder = getByFolderId(folderId);
-        validateUserAccess(folder, userId);
+        this.validateUserAccess(folder, userId);
         Folder parentFolder = getParentFolder(folderUpdateDto.getParentFolderId(), userId);
         Tag tag = tagService.getTag(folderUpdateDto.getTagId());
 
         folder.update(parentFolder, tag, folderUpdateDto.getFolderName(), userId, now);
-        folderRepository.save(folder);
-        folderHistoryRepository.save(FolderHistory.create(folder, now));
+        this.saveFolderWithHistory(folder);
     }
 
     private Folder getParentFolder(Long parentFolderId, Long userId) {
@@ -80,7 +71,7 @@ public class FolderService {
         }
 
         Folder parentFolderEntity = getByFolderId(parentFolderId);
-        validateUserAccess(parentFolderEntity, userId);
+        this.validateUserAccess(parentFolderEntity, userId);
 
         return parentFolderEntity;
     }
@@ -90,22 +81,22 @@ public class FolderService {
         LocalDateTime now = LocalDateTime.now();
 
         Folder folder = getByFolderId(folderId);
-        validateUserAccess(folder, userId);
+        this.validateUserAccess(folder, userId);
 
         // 재귀적으로 하위 폴더 및 관련 북마크 삭제
         deleteFolderAndSubFolders(folder, userId, now);
     }
 
-    private void deleteFolderAndSubFolders(Folder folder, Long userId, LocalDateTime now) {
+    @Transactional
+    public void deleteFolderAndSubFolders(Folder folder, Long userId, LocalDateTime now) {
         // 하위 폴더 삭제 (재귀 호출)
         for (Folder subFolder : this.getActiveSubFolders(folder)) {
-            deleteFolderAndSubFolders(subFolder, userId, now);
+            this.deleteFolderAndSubFolders(subFolder, userId, now);
         }
 
         // 현재 폴더 삭제 처리
         folder.delete(userId, now);
-        folderRepository.save(folder);
-        folderHistoryRepository.save(FolderHistory.create(folder, now));
+        this.saveFolderWithHistory(folder);
 
         // 폴더에 포함된 북마크 삭제
         bookmarkService.findAllByFolder(folder).stream()
@@ -144,7 +135,7 @@ public class FolderService {
                 .now(now)
                 .build());
 
-        copySubFolder(target, savedParentFolder, now, userId);
+        this.copySubFolder(target, savedParentFolder, now, userId);
     }
 
     @Transactional

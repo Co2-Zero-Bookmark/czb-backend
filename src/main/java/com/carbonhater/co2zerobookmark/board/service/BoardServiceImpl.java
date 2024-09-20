@@ -1,12 +1,15 @@
 package com.carbonhater.co2zerobookmark.board.service;
 
 
+import com.carbonhater.co2zerobookmark.board.model.BoardRequestDTO;
 import com.carbonhater.co2zerobookmark.board.model.BoardResponseDTO;
 import com.carbonhater.co2zerobookmark.board.model.LikeRequestDTO;
 import com.carbonhater.co2zerobookmark.board.repository.BoardRepository;
 import com.carbonhater.co2zerobookmark.board.repository.LikeRepository;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Board;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Like;
+import com.carbonhater.co2zerobookmark.bookmark.model.dto.FolderHierarchyDto;
+import com.carbonhater.co2zerobookmark.bookmark.service.FolderService;
 import com.carbonhater.co2zerobookmark.common.exception.CustomRuntimeException;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 public class BoardServiceImpl implements BoardService{
 
     private final BoardRepository boardRepository;
+    private final FolderService folderService;
     private final LikeRepository likeRepository;
 
     @Override
@@ -62,11 +66,64 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
+    public BoardResponseDTO createBoard(BoardRequestDTO boardRequestDTO) {
+        Board board = boardRepository.save(Board.builder()
+                .userId(boardRequestDTO.getUserId())
+                .boardTitle(boardRequestDTO.getBoardTitle())
+                .boardContent(boardRequestDTO.getBoardContent())
+                .rootFolderId(boardRequestDTO.getParentFolderId())
+                .build());
+
+        return BoardResponseDTO.builder()
+                .boardId(board.getBoardId())
+                .userId(board.getUserId())
+                .boardTitle(board.getBoardTitle())
+                .boardContent(board.getBoardContent())
+                .rootFolderId(board.getRootFolderId())
+                .build();
+    }
+
+    @Override
+    public BoardResponseDTO getBoard(Long boardId) {
+        return boardRepository.findByBoardIdAndDeletedYn(boardId, 'N')
+                .map(board -> {
+                    long likeCount = likeRepository.countByBoardIdAndDeletedYn(board.getBoardId(), 'N');
+                    boolean isLiked = likeRepository.findByBoardIdAndUserIdAndDeletedYn(board.getBoardId(), board.getUserId(), 'N').isPresent();
+                    FolderHierarchyDto folderHierarchyDto = folderService.getFolderHierarchyByParentFolderId(board.getRootFolderId());
+                    return BoardResponseDTO.builder()
+                            .boardId(board.getBoardId())
+                            .userId(board.getUserId())
+                            .boardTitle(board.getBoardTitle())
+                            .boardContent(board.getBoardContent())
+                            .rootFolderId(board.getRootFolderId())
+                            .boardIsLiked(isLiked)
+                            .boardLikeCount(likeCount)
+                            .folderHierarchyDto(folderHierarchyDto)
+                            .build();
+                })
+                .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
+    }
+
+    @Override
+    public String downloadBoard(Long parentFolderId, Long userId) {
+        FolderHierarchyDto folderHierarchyDto = folderService.getFolderHierarchyByParentFolderId(parentFolderId);
+        if (folderHierarchyDto == null) {
+            throw new NotFoundException("폴더 계층 구조를 가져오는데 실패했습니다.");
+        }
+        folderService.copyParentFolder(parentFolderId, userId);
+        return "폴더 계층 구조를 다운로드했습니다.";
+    }
+
+    @Override
     public String likeBoard(LikeRequestDTO likeRequestDTO) {
         // 이전에 userId와 BoardId가 유효한지 봐야 한다.
         boardRepository.findByBoardIdAndDeletedYn(likeRequestDTO.getBoardId(), 'N')
                 .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
-
+        // 여기에서 해당 유저와 boardid에 게시글이 있는지 확인해라.
+        likeRepository.findByBoardIdAndUserIdAndDeletedYn(likeRequestDTO.getBoardId(), likeRequestDTO.getUserId(), 'N')
+                .ifPresent(like -> {
+                    throw new CustomRuntimeException("이미 좋아요를 누른 게시글입니다.");
+                });
         try {
             likeRepository.save(Like.builder()
                     .boardId(likeRequestDTO.getBoardId())
@@ -101,4 +158,6 @@ public class BoardServiceImpl implements BoardService{
 
         return "좋아요 해제에 성공했습니다.";
     }
+
+
 }
