@@ -1,8 +1,6 @@
 package com.carbonhater.co2zerobookmark.bookmark.service;
 
-import com.carbonhater.co2zerobookmark.bookmark.model.dto.FolderHierarchyDto;
-import com.carbonhater.co2zerobookmark.bookmark.model.dto.FolderUpdateDto;
-import com.carbonhater.co2zerobookmark.bookmark.model.dto.FoldersCreateDto;
+import com.carbonhater.co2zerobookmark.bookmark.model.dto.*;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderHistoryRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Bookmark;
@@ -97,7 +95,7 @@ public class FolderService {
 
     private void deleteFolderAndSubFolders(Folder folder, Long userId, LocalDateTime now) {
         // 하위 폴더 삭제 (재귀 호출)
-        for (Folder subFolder : this.getActiveSubFoldersByUserId(folder, userId)) {
+        for (Folder subFolder : this.getActiveSubFolders(folder)) {
             deleteFolderAndSubFolders(subFolder, userId, now);
         }
 
@@ -112,8 +110,8 @@ public class FolderService {
                 .forEach(bookmarkService::deleteBookmark);
     }
 
-    private List<Folder> getActiveSubFoldersByUserId(Folder folder, Long userId) {
-        return folderRepository.findByFolderAndUserId(folder, userId);
+    private List<Folder> getActiveSubFolders(Folder folder) {
+        return folderRepository.findActiveByFolder(folder);
     }
 
     private void validateUserAccess(Folder folder, Long userId) {
@@ -122,21 +120,18 @@ public class FolderService {
         }
     }
 
-    public FolderHierarchyDto getFolderHierarchyByUserId(Long userId) {
+    public FolderHierarchyDto getFolderHierarchyByParentFolderId(Long parentFolderId) {
         // 루트 폴더들을 가져옴 (parent folder가 null인 폴더들)
-        List<Folder> rootFolders = folderRepository.findByUserIdAndFolderIsNull(userId);
+        Folder parentFolder = folderRepository.findActiveById(parentFolderId)
+                .orElseThrow(() -> new RuntimeException("Folder 에서 ID " + parentFolderId + "를 찾을 수 없습니다."));//TODO Exception Handler
 
         // 폴더 계층 구조를 DTO로 변환
-        List<FolderHierarchyDto.FolderDto> folders = rootFolders.stream()
-                .map(folder -> mapFolderToDto(folder, userId))
-                .collect(Collectors.toList());
-
-        return new FolderHierarchyDto(folders);
+        return new FolderHierarchyDto(this.mapFolderToDto(parentFolder));
     }
 
-    private FolderHierarchyDto.FolderDto mapFolderToDto(Folder folder, Long userId) {
+    private FolderHierarchyDto.FolderDto mapFolderToDto(Folder folder) {
         // 하위 폴더 가져오기
-        List<Folder> subFolders = this.getActiveSubFoldersByUserId(folder, userId);
+        List<Folder> subFolders = this.getActiveSubFolders(folder);
 
         // 북마크 가져오기
         List<Bookmark> bookmarks = bookmarkService.findAllByFolder(folder);
@@ -148,12 +143,12 @@ public class FolderService {
 
         // Tag 변환
         if (folder.getTag() != null) {
-            folderDto.setTag(new FolderHierarchyDto.TagDto(folder.getTag()));
+            folderDto.setTag(new TagDto(folder.getTag()));
         }
 
         // 하위 폴더와 북마크 재귀적으로 DTO로 변환
         folderDto.setSubFolders(subFolders.stream()
-                .map(subFolder -> mapFolderToDto(subFolder, userId))
+                .map(this::mapFolderToDto)
                 .collect(Collectors.toList()));
 
         folderDto.setBookmarks(bookmarks.stream()
@@ -161,5 +156,10 @@ public class FolderService {
                 .collect(Collectors.toList()));
 
         return folderDto;
+    }
+
+    public List<FolderDto> getRootFoldersByUserId(Long userId) {
+        return folderRepository.findByUserIdAndFolderIsNull(userId)
+                .stream().map(FolderDto::new).toList();
     }
 }

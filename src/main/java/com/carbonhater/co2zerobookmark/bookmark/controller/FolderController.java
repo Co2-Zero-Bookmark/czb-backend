@@ -19,17 +19,20 @@ public class FolderController {
     private final SignService signService;
 
     @GetMapping
-    public ResponseEntity<Object> getFolders() {
-        long userId = 0L; //TODO 스프링 시큐리티 개발 필요
-        return ResponseEntity.ok().body(folderService.getFolderHierarchyByUserId(userId));
+    public ResponseEntity<Object> getParentFolders() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long userId = signService.getUserIdByEmail(userEmail);
+        return ResponseEntity.ok().body(folderService.getRootFoldersByUserId(userId));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getFoldersByParentId(@PathVariable long id) {
+        return ResponseEntity.ok().body(folderService.getFolderHierarchyByParentFolderId(id));
     }
 
     @PostMapping
     public ResponseEntity<Object> createFolders(@RequestBody FoldersCreateDto foldersCreateDto) {
-//        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // 이메일로 사용자 ID 가져오기
         Long userId = signService.getUserIdByEmail(userEmail);
         folderService.createFolders(foldersCreateDto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -37,7 +40,6 @@ public class FolderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateFolder(@PathVariable long id, @RequestBody FolderUpdateDto folderUpdateDto) {
-
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Long userId = signService.getUserIdByEmail(userEmail);
         folderService.updateFolder(id, folderUpdateDto, userId);
@@ -46,7 +48,6 @@ public class FolderController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteFolder(@PathVariable long id) {
-
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Long userId = signService.getUserIdByEmail(userEmail);
         folderService.deleteFolder(id, userId);
