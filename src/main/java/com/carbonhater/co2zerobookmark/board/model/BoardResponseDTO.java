@@ -14,4 +14,6 @@ public class BoardResponseDTO {
     private Long boardLikeCount;
     private Boolean boardIsLiked;
 
+    private Long rootFolderId;
+
 }

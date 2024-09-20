@@ -12,4 +12,6 @@ public interface BoardService {
     String likeBoard(LikeRequestDTO likeRequestDTO);
 
     String dislikeBoard(LikeRequestDTO likeRequestDTO);
+
+    BoardResponseDTO createBoard(Long folderId, Long userId);
 }

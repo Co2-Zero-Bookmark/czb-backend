@@ -7,6 +7,7 @@ import com.carbonhater.co2zerobookmark.board.repository.BoardRepository;
 import com.carbonhater.co2zerobookmark.board.repository.LikeRepository;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Board;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Like;
+import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
 import com.carbonhater.co2zerobookmark.common.exception.CustomRuntimeException;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class BoardServiceImpl implements BoardService{
 
     private final BoardRepository boardRepository;
+    private final FolderRepository folderRepository;
     private final LikeRepository likeRepository;
 
     @Override
@@ -62,10 +64,30 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
+    public BoardResponseDTO createBoard(Long folderId, Long userId) {
+        // 폴더가 있는지 없는지 확인
+//        folderRepository.findByFolderAndUserId(folderId, userId)
+//                .orElseThrow(() -> new NotFoundException("폴더가 존재하지 않습니다."));
+        // folder id와 user Id -> writer Id -> board 생성
+        Board board = boardRepository.save(Board.builder()
+                .userId(userId)
+                .rootFolderId(folderId)
+                .build());
+
+        return BoardResponseDTO.builder()
+                .boardId(board.getBoardId())
+                .userId(board.getUserId())
+                .rootFolderId(board.getRootFolderId())
+                .build();
+    }
+
+
+    @Override
     public String likeBoard(LikeRequestDTO likeRequestDTO) {
         // 이전에 userId와 BoardId가 유효한지 봐야 한다.
         boardRepository.findByBoardIdAndDeletedYn(likeRequestDTO.getBoardId(), 'N')
                 .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
+
 
         try {
             likeRepository.save(Like.builder()
@@ -101,4 +123,6 @@ public class BoardServiceImpl implements BoardService{
 
         return "좋아요 해제에 성공했습니다.";
     }
+
+
 }

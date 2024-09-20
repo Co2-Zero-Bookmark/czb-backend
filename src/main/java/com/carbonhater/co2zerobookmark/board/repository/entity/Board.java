@@ -4,6 +4,7 @@ import com.carbonhater.co2zerobookmark.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Builder
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,4 +17,5 @@ public class Board extends BaseEntity {
       private Long userId;
       private String boardTitle;
       private String boardContent;
+      private Long rootFolderId;
 }
