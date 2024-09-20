@@ -1,4 +1,6 @@
-package com.carbonhater.co2zerobookmark.bookmark.repository.entity;
+package com.carbonhater.co2zerobookmark.bookmark.repository;
+
+import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Bookmark;
 
 import java.util.List;
 
