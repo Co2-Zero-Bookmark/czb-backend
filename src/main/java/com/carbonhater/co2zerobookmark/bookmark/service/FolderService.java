@@ -7,6 +7,8 @@ import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Bookmark;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Folder;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.FolderHistory;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Tag;
+import com.carbonhater.co2zerobookmark.common.exception.BadRequestException;
+import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,7 @@ public class FolderService {
 
     public Folder getByFolderId(Long folderId) {
         return folderRepository.findActiveById(folderId)
-                .orElseThrow(() -> new RuntimeException("Folder 에서 ID " + folderId + "를 찾을 수 없습니다.")); //TODO Exception Handler
+                .orElseThrow(() -> new NotFoundException("Folder 에서 ID " + folderId + "를 찾을 수 없습니다."));
     }
 
     @Transactional
@@ -40,7 +42,7 @@ public class FolderService {
         List<FolderHistory> histories = new ArrayList<>();
         for (FolderUpdateDto folder : foldersCreateDto.getFolders()) {
             if (Strings.isBlank(folder.getFolderName())) {
-                throw new RuntimeException("폴더 이름은 필수입니다."); //TODO Exception Handler
+                throw new BadRequestException("폴더 이름은 필수입니다.");
             }
             Folder folderEntity = Folder.builder()
                     .folder(this.getParentFolder(folder.getParentFolderId(), userId))
@@ -116,14 +118,14 @@ public class FolderService {
 
     private void validateUserAccess(Folder folder, Long userId) {
         if (!Objects.equals(folder.getUserId(), userId)) {
-            throw new RuntimeException("접근 불가능한 폴더입니다."); // TODO Exception Handler
+            throw new BadRequestException("접근 불가능한 폴더입니다.");
         }
     }
 
     public FolderHierarchyDto getFolderHierarchyByParentFolderId(Long parentFolderId) {
         // 루트 폴더들을 가져옴 (parent folder가 null인 폴더들)
         Folder parentFolder = folderRepository.findActiveById(parentFolderId)
-                .orElseThrow(() -> new RuntimeException("Folder 에서 ID " + parentFolderId + "를 찾을 수 없습니다."));//TODO Exception Handler
+                .orElseThrow(() -> new NotFoundException("Folder 에서 ID " + parentFolderId + "를 찾을 수 없습니다."));
 
         // 폴더 계층 구조를 DTO로 변환
         return new FolderHierarchyDto(this.mapFolderToDto(parentFolder));

@@ -1,15 +1,16 @@
 package com.carbonhater.co2zerobookmark.bookmark.controller;
 
+import com.carbonhater.co2zerobookmark.bookmark.model.dto.TagDto;
 import com.carbonhater.co2zerobookmark.bookmark.service.TagService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.carbonhater.co2zerobookmark.common.response.CustomResponseEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+import static com.carbonhater.co2zerobookmark.common.response.CustomResponseEntity.success;
 
 @RestController
 @RequestMapping("/api/v1/tags")
@@ -19,15 +20,7 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping
-    public ResponseEntity<Object> getTags() {
-        return ResponseEntity
-                .ok()
-                .body(new TagController.ResponseDto<>(tagService.getTags()));
-    }
-
-    @Data
-    @AllArgsConstructor
-    static class ResponseDto<T> {
-        private List<T> tags;
+    public CustomResponseEntity<List<TagDto>> getTags() {
+        return success(tagService.getTags());
     }
 }
