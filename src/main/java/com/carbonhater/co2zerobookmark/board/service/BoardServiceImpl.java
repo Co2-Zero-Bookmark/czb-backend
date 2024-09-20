@@ -1,13 +1,15 @@
 package com.carbonhater.co2zerobookmark.board.service;
 
 
+import com.carbonhater.co2zerobookmark.board.model.BoardRequestDTO;
 import com.carbonhater.co2zerobookmark.board.model.BoardResponseDTO;
 import com.carbonhater.co2zerobookmark.board.model.LikeRequestDTO;
 import com.carbonhater.co2zerobookmark.board.repository.BoardRepository;
 import com.carbonhater.co2zerobookmark.board.repository.LikeRepository;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Board;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Like;
-import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
+import com.carbonhater.co2zerobookmark.bookmark.model.dto.FolderHierarchyDto;
+import com.carbonhater.co2zerobookmark.bookmark.service.FolderService;
 import com.carbonhater.co2zerobookmark.common.exception.CustomRuntimeException;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
 public class BoardServiceImpl implements BoardService{
 
     private final BoardRepository boardRepository;
-    private final FolderRepository folderRepository;
+    private final FolderService folderService;
     private final LikeRepository likeRepository;
 
     @Override
@@ -64,21 +66,42 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
-    public BoardResponseDTO createBoard(Long folderId, Long userId) {
-        // 폴더가 있는지 없는지 확인
-//        folderRepository.findByFolderAndUserId(folderId, userId)
-//                .orElseThrow(() -> new NotFoundException("폴더가 존재하지 않습니다."));
-        // folder id와 user Id -> writer Id -> board 생성
+    public BoardResponseDTO createBoard(BoardRequestDTO boardRequestDTO) {
         Board board = boardRepository.save(Board.builder()
-                .userId(userId)
-                .rootFolderId(folderId)
+                .userId(boardRequestDTO.getUserId())
+                .boardTitle(boardRequestDTO.getBoardTitle())
+                .boardContent(boardRequestDTO.getBoardContent())
+                .rootFolderId(boardRequestDTO.getParentFolderId())
                 .build());
 
         return BoardResponseDTO.builder()
                 .boardId(board.getBoardId())
                 .userId(board.getUserId())
+                .boardTitle(board.getBoardTitle())
+                .boardContent(board.getBoardContent())
                 .rootFolderId(board.getRootFolderId())
                 .build();
+    }
+
+    @Override
+    public BoardResponseDTO getBoard(Long boardId) {
+        return boardRepository.findByBoardIdAndDeletedYn(boardId, 'N')
+                .map(board -> {
+                    long likeCount = likeRepository.countByBoardIdAndDeletedYn(board.getBoardId(), 'N');
+                    boolean isLiked = likeRepository.findByBoardIdAndUserIdAndDeletedYn(board.getBoardId(), board.getUserId(), 'N').isPresent();
+                    FolderHierarchyDto folderHierarchyDto = folderService.getFolderHierarchyByParentFolderId(board.getRootFolderId());
+                    return BoardResponseDTO.builder()
+                            .boardId(board.getBoardId())
+                            .userId(board.getUserId())
+                            .boardTitle(board.getBoardTitle())
+                            .boardContent(board.getBoardContent())
+                            .rootFolderId(board.getRootFolderId())
+                            .boardIsLiked(isLiked)
+                            .boardLikeCount(likeCount)
+                            .folderHierarchyDto(folderHierarchyDto)
+                            .build();
+                })
+                .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
     }
 
 

@@ -32,8 +32,24 @@ public class BoardController {
             return success(boardService.getAllBoards(userId));
     }
 
-    @PostMapping("/folder/{folderId}")
-    public CustomResponseEntity<BoardResponseDTO> createBoard(@PathVariable Long folderId){
+    @GetMapping("/{boardId}")
+    public CustomResponseEntity<BoardResponseDTO> getBoard(@PathVariable Long boardId){
+
+        log.info("getBoard Controller ==== boardId: {}", boardService.getBoard(boardId));
+        return success(boardService.getBoard(boardId));
+    }
+
+    @PostMapping("/board")
+    public CustomResponseEntity<BoardResponseDTO> createBoard(@RequestBody BoardRequestDTO boardRequestDTO){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long userId = signService.getUserIdByEmail(userEmail);
+        boardRequestDTO.setUserId(userId);
+        log.info("createBoard Controller ====  userId: {}, boardRequestDTO: {}", userEmail, boardRequestDTO);
+        return success(boardService.createBoard(boardRequestDTO));
+    }
+
+    @PostMapping("/{parentFolderId}")
+    public CustomResponseEntity<String> downloadBoard(@PathVariable Long parentFolderId){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Long userId = signService.getUserIdByEmail(userEmail);
         log.info("createBoard Controller ==== user Email: {}, userId: {}", userEmail, userId);
