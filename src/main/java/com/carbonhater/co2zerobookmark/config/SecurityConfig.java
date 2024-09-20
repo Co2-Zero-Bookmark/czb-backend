@@ -2,40 +2,19 @@ package com.carbonhater.co2zerobookmark.config;
 
 
 import com.carbonhater.co2zerobookmark.jwt.JWTAuthenticationFilter;
-import com.carbonhater.co2zerobookmark.user.repository.entity.CustomUserDetails;
-import io.swagger.v3.oas.models.info.Info;
-import jakarta.servlet.Filter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import com.carbonhater.co2zerobookmark.jwt.JWTTokenProvider;
+import com.carbonhater.co2zerobookmark.security.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // BCrypt 해시 함수로 암호화하는 구현체
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
-
-//LoginFilter와 JwtUtil import
-import com.carbonhater.co2zerobookmark.security.LoginFilter;
-import com.carbonhater.co2zerobookmark.jwt.JWTTokenProvider;
-import com.carbonhater.co2zerobookmark.user.service.impl.CustomUserDetailServiceImpl;
-import com.carbonhater.co2zerobookmark.user.repository.entity.User;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import java.util.Collections;
-import java.util.List;
-import jakarta.servlet.Filter;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 //비밀번호 암호화 관련: PasswordEncoder의 구현체 대입 -> Bean 등록
 @Configuration
