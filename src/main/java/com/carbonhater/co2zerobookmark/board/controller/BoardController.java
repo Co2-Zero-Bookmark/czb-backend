@@ -3,7 +3,6 @@ package com.carbonhater.co2zerobookmark.board.controller;
 import com.carbonhater.co2zerobookmark.board.model.BoardRequestDTO;
 import com.carbonhater.co2zerobookmark.board.model.BoardResponseDTO;
 import com.carbonhater.co2zerobookmark.board.model.LikeRequestDTO;
-import com.carbonhater.co2zerobookmark.board.repository.entity.Like;
 import com.carbonhater.co2zerobookmark.board.service.BoardService;
 import com.carbonhater.co2zerobookmark.common.response.CustomResponseEntity;
 import com.carbonhater.co2zerobookmark.user.service.SignService;

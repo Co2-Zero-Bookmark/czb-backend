@@ -1,5 +1,6 @@
 package com.carbonhater.co2zerobookmark.board.service;
 
+import com.carbonhater.co2zerobookmark.board.model.BoardRequestDTO;
 import com.carbonhater.co2zerobookmark.board.model.BoardResponseDTO;
 import com.carbonhater.co2zerobookmark.board.model.LikeRequestDTO;
 

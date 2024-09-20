@@ -1,5 +1,6 @@
 package com.carbonhater.co2zerobookmark.board.model;
 
+import com.carbonhater.co2zerobookmark.bookmark.model.dto.FolderHierarchyDto;
 import lombok.Builder;
 import lombok.Data;
 
