@@ -42,7 +42,6 @@ public class BookmarkController {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Long userId = signService.getUserIdByEmail(userEmail);
         Bookmark bookmark = bookmarkService.updateBookmark(bookmarkId, dto, userId);
-//        return ResponseEntity.ok(bookmark);
         return success(bookmark);
     }
 
