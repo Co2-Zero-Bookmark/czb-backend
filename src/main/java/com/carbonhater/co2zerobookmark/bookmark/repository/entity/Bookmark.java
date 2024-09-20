@@ -9,8 +9,8 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
 @Setter
+@Getter
 @ToString
 public class Bookmark extends BaseEntity {
 
@@ -24,10 +24,15 @@ public class Bookmark extends BaseEntity {
 
     private LocalDateTime lastVisitedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id")
     private Folder folder;
 
     private Long userId;
+
+
+    public Long getFolder() {
+        return folder.getFolderId();
+    }
 
 }

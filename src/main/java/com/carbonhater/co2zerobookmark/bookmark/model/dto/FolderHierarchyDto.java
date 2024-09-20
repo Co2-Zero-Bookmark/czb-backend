@@ -45,7 +45,7 @@ public class FolderHierarchyDto {
         private String bookmarkUrl;
 
         public BookmarkDto(Bookmark bookmark) {
-            this.bookmarkId = bookmark.getBookmarkId();
+            this.bookmarkId = (Long) bookmark.getBookmarkId();
             this.bookmarkName = bookmark.getBookmarkName();
             this.bookmarkUrl = bookmark.getBookmarkUrl();
         }
