@@ -119,8 +119,11 @@ public class BoardServiceImpl implements BoardService{
         // 이전에 userId와 BoardId가 유효한지 봐야 한다.
         boardRepository.findByBoardIdAndDeletedYn(likeRequestDTO.getBoardId(), 'N')
                 .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
-
-
+        // 여기에서 해당 유저와 boardid에 게시글이 있는지 확인해라.
+        likeRepository.findByBoardIdAndUserIdAndDeletedYn(likeRequestDTO.getBoardId(), likeRequestDTO.getUserId(), 'N')
+                .ifPresent(like -> {
+                    throw new CustomRuntimeException("이미 좋아요를 누른 게시글입니다.");
+                });
         try {
             likeRepository.save(Like.builder()
                     .boardId(likeRequestDTO.getBoardId())

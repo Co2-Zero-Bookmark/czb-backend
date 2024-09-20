@@ -69,7 +69,9 @@ public class BoardController {
 
     @DeleteMapping("/{boardId}/like")
     public CustomResponseEntity<String> dislikeBoard(@PathVariable Long boardId, LikeRequestDTO likeRequestDTO){
-        likeRequestDTO.setBoardId(boardId);
-        return success(boardService.dislikeBoard(likeRequestDTO));
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long userId = signService.getUserIdByEmail(userEmail);
+        LikeRequestDTO dislikeRequestDTO = new LikeRequestDTO(boardId, userId);
+        return success(boardService.dislikeBoard(dislikeRequestDTO));
     }
 }
