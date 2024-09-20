@@ -1,5 +1,6 @@
 package com.carbonhater.co2zerobookmark.bookmark.service;
 
+import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkCreateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.model.dto.*;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderHistoryRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
@@ -119,6 +120,56 @@ public class FolderService {
     private void validateUserAccess(Folder folder, Long userId) {
         if (!Objects.equals(folder.getUserId(), userId)) {
             throw new BadRequestException("접근 불가능한 폴더입니다.");
+        }
+    }
+
+    @Transactional
+    public Folder saveFolderWithHistory(Folder folder) {
+        Folder savedEntity = folderRepository.save(folder);
+        folderHistoryRepository.save(FolderHistory.create(savedEntity, LocalDateTime.now()));
+        return savedEntity;
+    }
+
+    @Transactional
+    public void copyParentFolder(Long parentFolderId, Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        Folder target = folderRepository.findActiveById(parentFolderId)
+                .orElseThrow(() -> new NotFoundException("Folder 에서 ID " + parentFolderId + "를 찾을 수 없습니다."));
+
+        Folder savedParentFolder = this.saveFolderWithHistory(Folder.builder()
+                .userId(userId)
+                .tag(target.getTag())
+                .folderName(target.getFolderName())
+                .now(now)
+                .build());
+
+        copySubFolder(target, savedParentFolder, now, userId);
+    }
+
+    @Transactional
+    public void copySubFolder(Folder target, Folder savedParentFolder, LocalDateTime now, Long userId) {
+        // 하위 폴더 생성
+        List<Folder> subFolders = this.getActiveSubFolders(target);
+        for (Folder subFolder : subFolders) {
+            Folder savedSubFolder = this.saveFolderWithHistory(Folder.builder()
+                    .folder(savedParentFolder)
+                    .userId(userId)
+                    .tag(subFolder.getTag())
+                    .folderName(subFolder.getFolderName())
+                    .now(now)
+                    .build());
+
+            // 북마크 생성
+            for (Bookmark bookmark : bookmarkService.findAllByFolder(subFolder)) {
+                BookmarkCreateDTO dto = new BookmarkCreateDTO();
+                dto.setBookmarkName(bookmark.getBookmarkName());
+                dto.setBookmarkUrl(bookmark.getBookmarkUrl());
+                dto.setFolderId(savedSubFolder.getFolderId());
+                bookmarkService.createBookmark(dto, userId);
+            }
+
+            this.copySubFolder(subFolder, savedSubFolder, now, userId);
         }
     }
 
