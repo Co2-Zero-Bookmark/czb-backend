@@ -109,7 +109,7 @@ public class FolderService {
         // 폴더에 포함된 북마크 삭제
         bookmarkService.findAllByFolder(folder).stream()
                 .map(Bookmark::getBookmarkId)
-                .forEach(bookmarkService::deleteBookmark);
+                .forEach(bookmarkId -> bookmarkService.deleteBookmark((Long) bookmarkId, userId));
     }
 
     private List<Folder> getActiveSubFolders(Folder folder) {
