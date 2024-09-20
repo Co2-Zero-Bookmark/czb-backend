@@ -9,6 +9,8 @@ public interface BoardService {
 
     List<BoardResponseDTO> getAllBoards(Long userId);
 
+    String downloadBoard(Long parentFolderId, Long userId);
+
     String likeBoard(LikeRequestDTO likeRequestDTO);
 
     String dislikeBoard(LikeRequestDTO likeRequestDTO);

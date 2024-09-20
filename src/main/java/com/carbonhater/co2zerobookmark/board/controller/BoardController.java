@@ -1,5 +1,6 @@
 package com.carbonhater.co2zerobookmark.board.controller;
 
+import com.carbonhater.co2zerobookmark.board.model.BoardRequestDTO;
 import com.carbonhater.co2zerobookmark.board.model.BoardResponseDTO;
 import com.carbonhater.co2zerobookmark.board.model.LikeRequestDTO;
 import com.carbonhater.co2zerobookmark.board.repository.entity.Like;
@@ -52,8 +53,8 @@ public class BoardController {
     public CustomResponseEntity<String> downloadBoard(@PathVariable Long parentFolderId){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Long userId = signService.getUserIdByEmail(userEmail);
-        log.info("createBoard Controller ==== user Email: {}, userId: {}", userEmail, userId);
-        return success(boardService.createBoard(folderId, userId));
+        log.info("downloadBoard Controller ==== userId: {}, parentFolderId: {}", userId, parentFolderId);
+        return success(boardService.downloadBoard(parentFolderId, userId));
     }
 
     @PostMapping("/{boardId}/like")

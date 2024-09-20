@@ -16,4 +16,5 @@ public class BoardResponseDTO {
 
     private Long rootFolderId;
 
+    private FolderHierarchyDto folderHierarchyDto;
 }

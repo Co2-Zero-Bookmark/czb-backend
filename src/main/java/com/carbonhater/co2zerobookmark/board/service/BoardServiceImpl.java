@@ -104,6 +104,15 @@ public class BoardServiceImpl implements BoardService{
                 .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
     }
 
+    @Override
+    public String downloadBoard(Long parentFolderId, Long userId) {
+        FolderHierarchyDto folderHierarchyDto = folderService.getFolderHierarchyByParentFolderId(parentFolderId);
+        if (folderHierarchyDto == null) {
+            throw new NotFoundException("폴더 계층 구조를 가져오는데 실패했습니다.");
+        }
+        folderService.copyParentFolder(parentFolderId, userId);
+        return "폴더 계층 구조를 다운로드했습니다.";
+    }
 
     @Override
     public String likeBoard(LikeRequestDTO likeRequestDTO) {
