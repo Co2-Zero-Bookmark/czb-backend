@@ -1,5 +1,6 @@
 package com.carbonhater.co2zerobookmark.bookmark.service;
 
+import com.carbonhater.co2zerobookmark.bookmark.model.BookmarkCreateDTO;
 import com.carbonhater.co2zerobookmark.bookmark.model.dto.*;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderHistoryRepository;
 import com.carbonhater.co2zerobookmark.bookmark.repository.FolderRepository;
@@ -7,6 +8,8 @@ import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Bookmark;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Folder;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.FolderHistory;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Tag;
+import com.carbonhater.co2zerobookmark.common.exception.BadRequestException;
+import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
@@ -29,7 +32,7 @@ public class FolderService {
 
     public Folder getByFolderId(Long folderId) {
         return folderRepository.findActiveById(folderId)
-                .orElseThrow(() -> new RuntimeException("Folder 에서 ID " + folderId + "를 찾을 수 없습니다.")); //TODO Exception Handler
+                .orElseThrow(() -> new NotFoundException("Folder 에서 ID " + folderId + "를 찾을 수 없습니다."));
     }
 
     @Transactional
@@ -40,7 +43,7 @@ public class FolderService {
         List<FolderHistory> histories = new ArrayList<>();
         for (FolderUpdateDto folder : foldersCreateDto.getFolders()) {
             if (Strings.isBlank(folder.getFolderName())) {
-                throw new RuntimeException("폴더 이름은 필수입니다."); //TODO Exception Handler
+                throw new BadRequestException("폴더 이름은 필수입니다.");
             }
             Folder folderEntity = Folder.builder()
                     .folder(this.getParentFolder(folder.getParentFolderId(), userId))
@@ -116,14 +119,64 @@ public class FolderService {
 
     private void validateUserAccess(Folder folder, Long userId) {
         if (!Objects.equals(folder.getUserId(), userId)) {
-            throw new RuntimeException("접근 불가능한 폴더입니다."); // TODO Exception Handler
+            throw new BadRequestException("접근 불가능한 폴더입니다.");
+        }
+    }
+
+    @Transactional
+    public Folder saveFolderWithHistory(Folder folder) {
+        Folder savedEntity = folderRepository.save(folder);
+        folderHistoryRepository.save(FolderHistory.create(savedEntity, LocalDateTime.now()));
+        return savedEntity;
+    }
+
+    @Transactional
+    public void copyParentFolder(Long parentFolderId, Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        Folder target = folderRepository.findActiveById(parentFolderId)
+                .orElseThrow(() -> new NotFoundException("Folder 에서 ID " + parentFolderId + "를 찾을 수 없습니다."));
+
+        Folder savedParentFolder = this.saveFolderWithHistory(Folder.builder()
+                .userId(userId)
+                .tag(target.getTag())
+                .folderName(target.getFolderName())
+                .now(now)
+                .build());
+
+        copySubFolder(target, savedParentFolder, now, userId);
+    }
+
+    @Transactional
+    public void copySubFolder(Folder target, Folder savedParentFolder, LocalDateTime now, Long userId) {
+        // 하위 폴더 생성
+        List<Folder> subFolders = this.getActiveSubFolders(target);
+        for (Folder subFolder : subFolders) {
+            Folder savedSubFolder = this.saveFolderWithHistory(Folder.builder()
+                    .folder(savedParentFolder)
+                    .userId(userId)
+                    .tag(subFolder.getTag())
+                    .folderName(subFolder.getFolderName())
+                    .now(now)
+                    .build());
+
+            // 북마크 생성
+            for (Bookmark bookmark : bookmarkService.findAllByFolder(subFolder)) {
+                BookmarkCreateDTO dto = new BookmarkCreateDTO();
+                dto.setBookmarkName(bookmark.getBookmarkName());
+                dto.setBookmarkUrl(bookmark.getBookmarkUrl());
+                dto.setFolderId(savedSubFolder.getFolderId());
+                bookmarkService.createBookmark(dto, userId);
+            }
+
+            this.copySubFolder(subFolder, savedSubFolder, now, userId);
         }
     }
 
     public FolderHierarchyDto getFolderHierarchyByParentFolderId(Long parentFolderId) {
         // 루트 폴더들을 가져옴 (parent folder가 null인 폴더들)
         Folder parentFolder = folderRepository.findActiveById(parentFolderId)
-                .orElseThrow(() -> new RuntimeException("Folder 에서 ID " + parentFolderId + "를 찾을 수 없습니다."));//TODO Exception Handler
+                .orElseThrow(() -> new NotFoundException("Folder 에서 ID " + parentFolderId + "를 찾을 수 없습니다."));
 
         // 폴더 계층 구조를 DTO로 변환
         return new FolderHierarchyDto(this.mapFolderToDto(parentFolder));
