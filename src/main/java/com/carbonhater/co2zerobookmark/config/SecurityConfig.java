@@ -64,7 +64,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())// CSRF 보호 비활성화 (REST 환경)
                 .formLogin((auth) -> auth.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/users/sign-up", "/api/v1/users/login", "/api/v1/*").permitAll()
+                        .requestMatchers("/api/v1/users/sign-up", "/api/v1/users/login", "/api/v1/**").permitAll()
                         .requestMatchers("/api/v1/folders/**").authenticated()
                         .anyRequest().authenticated())
 //                .userDetailsService(userDetailsService()) todo
