@@ -19,20 +19,24 @@ public class BookmarkRepositoryCustomImpl implements BookmarkRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Bookmark> searchBookmarks(String bookmarkName, String sort, String order, int offset, int limit) {
+    public List<Bookmark> searchBookmarks(String bookmarkName, Long userId, String sort, String order, int offset, int limit) {
         QBookmark bookmark = QBookmark.bookmark;
 
         // 동적 where 절
         BooleanExpression nameCondition = (bookmarkName != null && !bookmarkName.trim().isEmpty())
                 ? bookmark.bookmarkName.containsIgnoreCase(bookmarkName)
                 : null;
+        BooleanExpression userCondition = (userId != null)
+                ? bookmark.userId.eq(userId)
+                : null;
+
         BooleanExpression deletedCondition = bookmark.deletedYn.eq('N'); // 삭제되지 않은 북마크만
 
         // 동적 정렬 조건
         OrderSpecifier<?> sortOrder = getSortOrder(bookmark, sort, order);
 
         return queryFactory.selectFrom(bookmark)
-                .where(deletedCondition, nameCondition) // 삭제 조건 및 이름 조건을 모두 추가
+                .where(deletedCondition, nameCondition, userCondition) // 삭제 조건 및 이름 조건을 모두 추가
                 .orderBy(sortOrder)
                 .offset(offset)
                 .limit(limit)

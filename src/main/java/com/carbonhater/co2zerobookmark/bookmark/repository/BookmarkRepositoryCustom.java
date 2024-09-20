@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface BookmarkRepositoryCustom {
     List<Bookmark> searchBookmarks(String bookmarkName,
+                                   Long userId,
                                    String sort,
                                    String order,
                                    int offset,
