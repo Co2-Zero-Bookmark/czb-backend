@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,19 +90,21 @@ public class FolderService {
 
     @Transactional
     public void deleteFolderAndSubFolders(Folder folder, Long userId, LocalDateTime now) {
-        // 하위 폴더 삭제 (재귀 호출)
-        for (Folder subFolder : this.getActiveSubFolders(folder)) {
-            this.deleteFolderAndSubFolders(subFolder, userId, now);
+        Stack<Folder> stack = new Stack<>();
+        stack.push(folder);
+
+        while (!stack.isEmpty()) {
+            Folder currentFolder = stack.pop();
+            // 하위 폴더들을 스택에 추가
+            List<Folder> subFolders = getActiveSubFolders(currentFolder);
+            stack.addAll(subFolders);
+
+            // 북마크 삭제 및 현재 폴더 삭제
+            bookmarkService.findAllByFolder(currentFolder)
+                    .forEach(bookmark -> bookmarkService.deleteBookmark(bookmark.getBookmarkId(), userId));
+            currentFolder.delete(userId, now);
+            saveFolderWithHistory(currentFolder);
         }
-
-        // 현재 폴더 삭제 처리
-        folder.delete(userId, now);
-        this.saveFolderWithHistory(folder);
-
-        // 폴더에 포함된 북마크 삭제
-        bookmarkService.findAllByFolder(folder).stream()
-                .map(Bookmark::getBookmarkId)
-                .forEach(bookmarkId -> bookmarkService.deleteBookmark(bookmarkId, userId));
     }
 
     private List<Folder> getActiveSubFolders(Folder folder) {
