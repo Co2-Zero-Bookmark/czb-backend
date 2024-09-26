@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -26,6 +27,14 @@ public class FolderHierarchyDto {
         private TagDto tag;
         private List<FolderDto> subFolders;
         private List<BookmarkDto> bookmarks;
+
+        public FolderDto(Folder folderEntity) {
+            this.folderId = folderEntity.getFolderId();
+            this.folderName = folderEntity.getFolderName();
+            this.tag = (folderEntity.getTag() != null) ? new TagDto(folderEntity.getTag()) : null;
+            this.subFolders = new ArrayList<>();
+            this.bookmarks = new ArrayList<>();
+        }
 
         public FolderDto(Folder folderEntity, List<Folder> subFolders, List<Bookmark> bookmarks) {
             this.folderId = folderEntity.getFolderId();
