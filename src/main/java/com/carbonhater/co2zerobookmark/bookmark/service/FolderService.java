@@ -144,27 +144,37 @@ public class FolderService {
 
     @Transactional
     public void copySubFolder(Folder target, Folder savedParentFolder, LocalDateTime now, Long userId) {
-        // 하위 폴더 생성
-        List<Folder> subFolders = this.getActiveSubFolders(target);
-        for (Folder subFolder : subFolders) {
-            Folder savedSubFolder = this.saveFolderWithHistory(Folder.builder()
-                    .folder(savedParentFolder)
-                    .userId(userId)
-                    .tag(subFolder.getTag())
-                    .folderName(subFolder.getFolderName())
-                    .now(now)
-                    .build());
+        Stack<Pair<Folder, Folder>> stack = new Stack<>();
+        stack.push(new Pair<>(target, savedParentFolder));  // (원본 폴더, 새로 생성된 폴더) 쌍을 스택에 푸시
 
-            // 북마크 생성
-            for (Bookmark bookmark : bookmarkService.findAllByFolder(subFolder)) {
-                BookmarkCreateDTO dto = new BookmarkCreateDTO();
-                dto.setBookmarkName(bookmark.getBookmarkName());
-                dto.setBookmarkUrl(bookmark.getBookmarkUrl());
-                dto.setFolderId(savedSubFolder.getFolderId());
-                bookmarkService.createBookmark(dto, userId);
+        while (!stack.isEmpty()) {
+            Pair<Folder, Folder> current = stack.pop();
+            Folder currentFolder = current.getFirst();
+            Folder currentSavedFolder = current.getSecond();
+
+            // 하위 폴더 생성
+            List<Folder> subFolders = this.getActiveSubFolders(currentFolder);
+            for (Folder subFolder : subFolders) {
+                Folder savedSubFolder = this.saveFolderWithHistory(Folder.builder()
+                        .folder(currentSavedFolder)
+                        .userId(userId)
+                        .tag(subFolder.getTag())
+                        .folderName(subFolder.getFolderName())
+                        .now(now)
+                        .build());
+
+                // 북마크 생성
+                for (Bookmark bookmark : bookmarkService.findAllByFolder(subFolder)) {
+                    BookmarkCreateDTO dto = new BookmarkCreateDTO();
+                    dto.setBookmarkName(bookmark.getBookmarkName());
+                    dto.setBookmarkUrl(bookmark.getBookmarkUrl());
+                    dto.setFolderId(savedSubFolder.getFolderId());
+                    bookmarkService.createBookmark(dto, userId);
+                }
+
+                // 하위 폴더도 스택에 푸시
+                stack.push(new Pair<>(subFolder, savedSubFolder));
             }
-
-            this.copySubFolder(subFolder, savedSubFolder, now, userId);
         }
     }
 
