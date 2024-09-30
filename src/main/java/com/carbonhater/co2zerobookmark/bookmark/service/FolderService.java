@@ -10,6 +10,7 @@ import com.carbonhater.co2zerobookmark.bookmark.repository.entity.FolderHistory;
 import com.carbonhater.co2zerobookmark.bookmark.repository.entity.Tag;
 import com.carbonhater.co2zerobookmark.common.exception.BadRequestException;
 import com.carbonhater.co2zerobookmark.common.exception.NotFoundException;
+import com.mysema.commons.lang.Pair;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,19 +91,21 @@ public class FolderService {
 
     @Transactional
     public void deleteFolderAndSubFolders(Folder folder, Long userId, LocalDateTime now) {
-        // 하위 폴더 삭제 (재귀 호출)
-        for (Folder subFolder : this.getActiveSubFolders(folder)) {
-            this.deleteFolderAndSubFolders(subFolder, userId, now);
+        Stack<Folder> stack = new Stack<>();
+        stack.push(folder);
+
+        while (!stack.isEmpty()) {
+            Folder currentFolder = stack.pop();
+            // 하위 폴더들을 스택에 추가
+            List<Folder> subFolders = getActiveSubFolders(currentFolder);
+            stack.addAll(subFolders);
+
+            // 북마크 삭제 및 현재 폴더 삭제
+            bookmarkService.findAllByFolder(currentFolder)
+                    .forEach(bookmark -> bookmarkService.deleteBookmark(bookmark.getBookmarkId(), userId));
+            currentFolder.delete(userId, now);
+            saveFolderWithHistory(currentFolder);
         }
-
-        // 현재 폴더 삭제 처리
-        folder.delete(userId, now);
-        this.saveFolderWithHistory(folder);
-
-        // 폴더에 포함된 북마크 삭제
-        bookmarkService.findAllByFolder(folder).stream()
-                .map(Bookmark::getBookmarkId)
-                .forEach(bookmarkId -> bookmarkService.deleteBookmark(bookmarkId, userId));
     }
 
     private List<Folder> getActiveSubFolders(Folder folder) {
@@ -140,27 +144,37 @@ public class FolderService {
 
     @Transactional
     public void copySubFolder(Folder target, Folder savedParentFolder, LocalDateTime now, Long userId) {
-        // 하위 폴더 생성
-        List<Folder> subFolders = this.getActiveSubFolders(target);
-        for (Folder subFolder : subFolders) {
-            Folder savedSubFolder = this.saveFolderWithHistory(Folder.builder()
-                    .folder(savedParentFolder)
-                    .userId(userId)
-                    .tag(subFolder.getTag())
-                    .folderName(subFolder.getFolderName())
-                    .now(now)
-                    .build());
+        Stack<Pair<Folder, Folder>> stack = new Stack<>();
+        stack.push(new Pair<>(target, savedParentFolder));  // (원본 폴더, 새로 생성된 폴더) 쌍을 스택에 푸시
 
-            // 북마크 생성
-            for (Bookmark bookmark : bookmarkService.findAllByFolder(subFolder)) {
-                BookmarkCreateDTO dto = new BookmarkCreateDTO();
-                dto.setBookmarkName(bookmark.getBookmarkName());
-                dto.setBookmarkUrl(bookmark.getBookmarkUrl());
-                dto.setFolderId(savedSubFolder.getFolderId());
-                bookmarkService.createBookmark(dto, userId);
+        while (!stack.isEmpty()) {
+            Pair<Folder, Folder> current = stack.pop();
+            Folder currentFolder = current.getFirst();
+            Folder currentSavedFolder = current.getSecond();
+
+            // 하위 폴더 생성
+            List<Folder> subFolders = this.getActiveSubFolders(currentFolder);
+            for (Folder subFolder : subFolders) {
+                Folder savedSubFolder = this.saveFolderWithHistory(Folder.builder()
+                        .folder(currentSavedFolder)
+                        .userId(userId)
+                        .tag(subFolder.getTag())
+                        .folderName(subFolder.getFolderName())
+                        .now(now)
+                        .build());
+
+                // 북마크 생성
+                for (Bookmark bookmark : bookmarkService.findAllByFolder(subFolder)) {
+                    BookmarkCreateDTO dto = new BookmarkCreateDTO();
+                    dto.setBookmarkName(bookmark.getBookmarkName());
+                    dto.setBookmarkUrl(bookmark.getBookmarkUrl());
+                    dto.setFolderId(savedSubFolder.getFolderId());
+                    bookmarkService.createBookmark(dto, userId);
+                }
+
+                // 하위 폴더도 스택에 푸시
+                stack.push(new Pair<>(subFolder, savedSubFolder));
             }
-
-            this.copySubFolder(subFolder, savedSubFolder, now, userId);
         }
     }
 
@@ -174,32 +188,36 @@ public class FolderService {
     }
 
     private FolderHierarchyDto.FolderDto mapFolderToDto(Folder folder) {
-        // 하위 폴더 가져오기
-        List<Folder> subFolders = this.getActiveSubFolders(folder);
+        // 최상위 폴더 생성
+        FolderHierarchyDto.FolderDto rootFolderDto = new FolderHierarchyDto.FolderDto(folder);
 
-        // 북마크 가져오기
-        List<Bookmark> bookmarks = bookmarkService.findAllByFolder(folder);
+        // 스택을 사용하여 폴더 구조를 처리
+        Stack<Pair<Folder, FolderHierarchyDto.FolderDto>> stack = new Stack<>();
+        stack.push(new Pair<>(folder, rootFolderDto));
 
-        // Folder 변환
-        FolderHierarchyDto.FolderDto folderDto = new FolderHierarchyDto.FolderDto();
-        folderDto.setFolderId(folder.getFolderId());
-        folderDto.setFolderName(folder.getFolderName());
+        while (!stack.isEmpty()) {
+            Pair<Folder, FolderHierarchyDto.FolderDto> current = stack.pop();
+            Folder currentFolder = current.getFirst();
+            FolderHierarchyDto.FolderDto currentFolderDto = current.getSecond();
 
-        // Tag 변환
-        if (folder.getTag() != null) {
-            folderDto.setTag(new TagDto(folder.getTag()));
+            // 현재 폴더의 북마크를 DTO로 변환하여 추가
+            List<Bookmark> bookmarks = bookmarkService.findAllByFolder(currentFolder);
+            currentFolderDto.setBookmarks(bookmarks.stream()
+                    .map(FolderHierarchyDto.BookmarkDto::new)
+                    .collect(Collectors.toList()));
+
+            // 현재 폴더의 하위 폴더들을 가져옴
+            List<Folder> subFolders = this.getActiveSubFolders(currentFolder);
+
+            // 하위 폴더를 순차적으로 처리
+            for (Folder subFolder : subFolders) {
+                FolderHierarchyDto.FolderDto subFolderDto = new FolderHierarchyDto.FolderDto(subFolder);
+                currentFolderDto.getSubFolders().add(subFolderDto);
+                stack.push(new Pair<>(subFolder, subFolderDto));
+            }
         }
 
-        // 하위 폴더와 북마크 재귀적으로 DTO로 변환
-        folderDto.setSubFolders(subFolders.stream()
-                .map(this::mapFolderToDto)
-                .collect(Collectors.toList()));
-
-        folderDto.setBookmarks(bookmarks.stream()
-                .map(FolderHierarchyDto.BookmarkDto::new)
-                .collect(Collectors.toList()));
-
-        return folderDto;
+        return rootFolderDto;
     }
 
     public List<FolderDto> getRootFoldersByUserId(Long userId) {
